@@ -14,6 +14,7 @@ float {printf("Float declaration\n "); return FLOAT;}
 char {printf("Character declaration\n "); return CHAR;}
 string {printf("String declaration\n "); return STRING;}
 bool {printf("Boolean declaration\n "); return BOOL;}
+void {printf("Void declaration\n "); return VOID;}
 
  /*Resereved keywords for the programming lang, we will not allow for users to use reserved keywords as identifiers later on */
 for {printf("For loop\n "); return FOR;}
@@ -29,6 +30,8 @@ case {printf("Case statement\n "); return CASE;}
 default {printf("Default statement\n "); return DEFAULT;}
 constant {printf("Constant declaration\n "); return CONSTANT;}
 return {printf("Return statement\n "); return RETURN;}
+def {printf("Define statement\n "); return DEF;}
+
 
  /*Constants*/
 [0-9]+  {printf("Integer\n "); yylval.integerValue = atoi(yytext); return INT_VALUE;}
