@@ -84,7 +84,7 @@ argument_list: argument_list COMMA argument
 | argument
 | ;
 argument: condtional_expr
-| IDENTIFIER ASSIGN condtional_expr;
+|DEFAULT IDENTIFIER ASSIGN condtional_expr;
 
 /*If statment*/
 /*define an unambiguous if statement*/
