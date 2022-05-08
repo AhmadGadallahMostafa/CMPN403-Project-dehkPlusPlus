@@ -1,6 +1,7 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include "y.tab.h"
 %}
 
  /*Here we will define our tokens and rules for each token  
@@ -47,9 +48,9 @@ false   {return BOOL_VALUE_FALSE;}
 
  /*Math Operators*/
 \= {return ASSIGN;}
-\+ {return ADD;}
-\- {return SUBTRACT;}
-\* {return MULTIPLY;}
+\+ {return PLUS;}
+\- {return MINUS;}
+\* {return TIMES;}
 \/ {return DIVIDE;}
 \% {return MODULUS;}
 \^ {return EXPONENT;}
@@ -61,7 +62,7 @@ false   {return BOOL_VALUE_FALSE;}
 
  /*Relational Operators*/
 "==" {return EQUAL;}
-"!=" {return NOT_EQUAL;}
+"!=" {return NOTEQUAL;}
 ">"  {return GREATER_THAN;}
 "<"  {return LESS_THAN;}
 ">=" {return GREATER_THAN_EQUAL;}
@@ -70,16 +71,12 @@ false   {return BOOL_VALUE_FALSE;}
  /*Delimiters*/
 \( {return LEFT_PAREN;}
 \) {return RIGHT_PAREN;}
-\[ {return LEFT_BRACKET;}
-\] {return RIGHT_BRACKET;}
 \{ {return LEFT_BRACE;}
 \} {return RIGHT_BRACE;}
 \, {return COMMA;}
 \; {return SEMICOLON;}
 \: {return COLON;} 
  /*Whitespace*/
-" " {return WHITESPACE;}
-\t+ {return TAB;}
 \n  {return NEWLINE;}
 %%
 

@@ -13,7 +13,7 @@ int yylex(void);
 %token ASSIGN PLUS MINUS TIMES DIVIDE MODULUS EXPONENT
 %token AND OR NOT
 %token EQUAL NOTEQUAL GREATER_THAN GREATER_THAN_EQUAL LESS_THAN LESS_THAN_EQUAL
-%token LEFT_PAREN RIGHT_PAREN  LEFT_BRACE RIGHT_BRACE COMMA SEMICOLON COLON
+%token LEFT_PAREN RIGHT_PAREN LEFT_BRACE RIGHT_BRACE COMMA SEMICOLON COLON
 %token NEWLINE
 
 
@@ -29,10 +29,23 @@ int yylex(void);
 %left TIMES DIVIDE MODULUS
 %right EXPONENT
 
+
+
+%union{
+    char *stringValue;
+    char characterValue; 
+    int integerValue;
+    float floatValue;
+}
+
+
+
+
+
  /*Defining the grammar */
 %start program
 %%
-program : program statement
+program : program statement NEWLINE
 | statement NEWLINE;
 
 statement: expr;
@@ -76,13 +89,16 @@ parameter: variable_type IDENTIFIER
 | variable_type IDENTIFIER ASSIGN condtional_expr;
 
 /*Function call*/
-function_call: IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN SEMICOLON
+function_call: IDENTIFIER LEFT_PAREN args_list RIGHT_PAREN SEMICOLON;
 
-function_call_in_expr: IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN;
+function_call_in_expr: IDENTIFIER LEFT_PAREN args_list RIGHT_PAREN;
+
+args_list: argument_list
+| ;
 
 argument_list: argument_list COMMA argument
-| argument
-| ;
+| argument;
+
 argument: condtional_expr
 |DEFAULT IDENTIFIER ASSIGN condtional_expr;
 
@@ -103,7 +119,6 @@ while_statement: WHILE LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program
 do_statement: DO LEFT_BRACE program RIGHT_BRACE WHILE LEFT_PAREN condtional_expr RIGHT_PAREN SEMICOLON;
 
 condtional_expr: math_expr
-| IDENTIFIER
 | function_call_in_expr
 | CONST_VALUE;
 
@@ -160,14 +175,6 @@ math_expr: math_expr OR math_expr
 | IDENTIFIER;
 
 %%
-
-%union{
-char *stringValue;
-char characterValue; 
-int integerValue;
-float floatValue;
-}
-
 
 int main (void)
 {
