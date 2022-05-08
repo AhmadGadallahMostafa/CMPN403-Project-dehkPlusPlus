@@ -33,7 +33,7 @@ int yylex(void);
 %start program
 %%
 program : program statement
-| statement;
+| statement NEWLINE;
 
 statement: expr;
 
@@ -43,6 +43,7 @@ expr: variable_declaration
 | function_declaration
 | function_call
 | if_statement
+| do_statement
 | while_statement
 | switch_statement
 | break_statement
@@ -57,8 +58,7 @@ variable_declaration: variable_type IDENTIFIER SEMICOLON
 
 CONST_VALUE: INT_VALUE | FLOAT_VALUE | STRING_VALUE | CHAR_VALUE | BOOL_VALUE_TRUE | BOOL_VALUE_FALSE;
 
-const_variable_declaration: CONSTANT variable_type IDENTIFIER SEMICOLON
-| CONSTANT variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON;
+const_variable_declaration: CONSTANT variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON;
 
 variable_type: INT | FLOAT | STRING | CHAR | BOOL;
 
@@ -69,19 +69,18 @@ function_declaration: DEF variable_type IDENTIFIER LEFT_PAREN parameter_list RIG
 | DEF VOID IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE SEMICOLON;
 
 parameter_list: parameter_list COMMA parameter
-| parameter;
+| parameter
+| ;
 
-parameter: variable_type IDENTIFIER;
+parameter: variable_type IDENTIFIER
+| variable_type IDENTIFIER ASSIGN condtional_expr;
 
 /*Function call*/
-function_call: IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN
-|  IDENTIFIER ASSIGN IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN
+function_call: IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN SEMICOLON
+|  IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN;
 argument_list: argument_list COMMA argument
 | argument;
-argument: IDENTIFIER
-| CONST_VALUE
-| math_expr
-| function_call;
+argument: condtional_expr;
 
 /*If statment*/
 /*define an unambiguous if statement*/
