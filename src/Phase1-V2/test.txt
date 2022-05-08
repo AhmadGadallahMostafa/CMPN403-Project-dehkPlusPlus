@@ -1,0 +1,42 @@
+int x;
+string a = "asd";
+x=5;
+constant int y = 10;
+sum(x1,x2);
+def int sum (int x1, int x2)
+{
+int x;
+return;
+}
+if(x1<5)
+{
+if (x1<4){int x;}
+int x;
+}
+elseif(x1<x2){int x;
+}
+else{
+int x;
+}
+while(x1>x2)
+{
+int x;
+continue;
+break;
+}
+do{int x;
+}
+while(x1<x2);
+switch(s2){case 2:{int x;
+}}
+int x = 5+5;
+for(int i=0;i<5;i=i+1){int x;
+}
+if(x1&&5){int x;
+}elseif(x1<x2){int x;
+}else{int x;
+}
+if(x1||5){int x;
+}elseif(x1<x2){int x;
+}else{int x;
+}

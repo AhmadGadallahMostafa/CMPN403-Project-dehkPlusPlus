@@ -79,7 +79,7 @@ false   {return BOOL_VALUE_FALSE;}
 \; {return SEMICOLON;}
 \: {return COLON;} 
  /*Whitespace*/
- [ \t\r\n]+                          ; /* ignore whitespace */
+\n  {return NEWLINE;}
 %%
 
 

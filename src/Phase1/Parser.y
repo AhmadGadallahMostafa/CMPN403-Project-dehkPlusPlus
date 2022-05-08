@@ -16,6 +16,8 @@ int yylex(void);
 %token AND OR NOT
 %token EQUAL NOTEQUAL GREATER_THAN GREATER_THAN_EQUAL LESS_THAN LESS_THAN_EQUAL
 %token LEFT_PAREN RIGHT_PAREN LEFT_BRACE RIGHT_BRACE COMMA SEMICOLON COLON
+%token NEWLINE
+
 
  /*Defingin assciotaivety and precedence of operators */
 %right ASSIGN
@@ -45,8 +47,8 @@ int yylex(void);
  /*Defining the grammar */
 %start program
 %%
-program : program statement 
-| statement
+program : program statement NEWLINE
+| statement NEWLINE
 ;
 
 statement: expr;
@@ -117,7 +119,7 @@ elseif_expr: ELSEIF LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RI
 /*While statement*/
 while_statement: WHILE LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE;
 
-do_statement: DO LEFT_BRACE program RIGHT_BRACE WHILE LEFT_PAREN condtional_expr RIGHT_PAREN SEMICOLON;
+do_statement: DO LEFT_BRACE program RIGHT_BRACE NEWLINE WHILE LEFT_PAREN condtional_expr RIGHT_PAREN SEMICOLON;
 
 condtional_expr: math_expr
 | function_call_in_expr
