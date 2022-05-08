@@ -81,13 +81,8 @@ false   {return BOOL_VALUE_FALSE;}
 " " {return WHITESPACE;}
 \t+ {return TAB;}
 \n  {return NEWLINE;}
-. {printf("Error")}
 %%
 
-int main(void){
-    yylex();
-    return 0;
-}
 
 int yywrap(void){
     return 1;

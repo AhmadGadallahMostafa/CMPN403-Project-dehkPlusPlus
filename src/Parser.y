@@ -13,8 +13,8 @@ int yylex(void);
 %token ASSIGN PLUS MINUS TIMES DIVIDE MODULUS EXPONENT
 %token AND OR NOT
 %token EQUAL NOTEQUAL GREATER_THAN GREATER_THAN_EQUAL LESS_THAN LESS_THAN_EQUAL
-%token LEFT_PAREN RIGHT_PAREN LEFT_BRACKET RIGHT_BRACKET LEFT_BRACE RIGHT_BRACE COMMA SEMICOLON COLON
-%token WHITE_SPACE TAB NEWLINE
+%token LEFT_PAREN RIGHT_PAREN  LEFT_BRACE RIGHT_BRACE COMMA SEMICOLON COLON
+%token NEWLINE
 
 
  /*Defingin assciotaivety and precedence of operators */
@@ -77,10 +77,14 @@ parameter: variable_type IDENTIFIER
 
 /*Function call*/
 function_call: IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN SEMICOLON
-|  IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN;
+
+function_call_in_expr: IDENTIFIER LEFT_PAREN argument_list RIGHT_PAREN;
+
 argument_list: argument_list COMMA argument
-| argument;
-argument: condtional_expr;
+| argument
+| ;
+argument: condtional_expr
+| IDENTIFIER ASSIGN condtional_expr;
 
 /*If statment*/
 /*define an unambiguous if statement*/
@@ -100,15 +104,17 @@ do_statement: DO LEFT_BRACE program RIGHT_BRACE WHILE LEFT_PAREN condtional_expr
 
 condtional_expr: math_expr
 | IDENTIFIER
-| function_call
+| function_call_in_expr
 | CONST_VALUE;
 
 /*Switch statement*/
 switch_statement: SWITCH LEFT_PAREN IDENTIFIER RIGHT_PAREN LEFT_BRACE switch_case_list RIGHT_BRACE;
 switch_case_list: switch_case_list switch_case
 | switch_case;
-switch_case: CASE CONST_VALUE COLON program
-| DEFAULT COLON program ;
+switch_case: CASE switch_case_value COLON LEFT_BRACE program RIGHT_BRACE
+| DEFAULT COLON LEFT_BRACE program RIGHT_BRACE;
+
+switch_case_value: INT_VALUE | CHAR_VALUE | BOOL_VALUE_TRUE | BOOL_VALUE_FALSE;
 
 /*Break statement*/
 break_statement: BREAK SEMICOLON;
@@ -122,13 +128,17 @@ return_statement: RETURN SEMICOLON
 
 /*For statement*/
 for_statement: FOR LEFT_PAREN for_init_expr SEMICOLON condtional_expr SEMICOLON for_loop_do RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE;
-for_loop_do: for_loop_do COMMA for_loop_do
-| for_loop_do
-| condtional_expr;
+for_loop_do: final_expr COMMA final_expr
+| final_expr
 
-/*we will not allow function calls */
-for_init_expr: variable_declaration
-| variable_assignment;
+final_expr: condtional_expr 
+| ;
+
+for_init_expr: variable_type IDENTIFIER 
+| variable_type IDENTIFIER ASSIGN condtional_expr
+| IDENTIFIER ASSIGN condtional_expr
+| condtional_expr
+| ;
 
 /*Math expression*/
 math_expr: math_expr OR math_expr
@@ -146,21 +156,40 @@ math_expr: math_expr OR math_expr
 | math_expr DIVIDE math_expr
 | math_expr MODULUS math_expr
 | math_expr EXPONENT math_expr
-| math_expr
-| IDENTIFIER
-| CONST_VALUE
-| function_call
 | LEFT_PAREN math_expr RIGHT_PAREN
+| IDENTIFIER;
 
 %%
-
-
-
 
 %union{
 char *stringValue;
 char characterValue; 
 int integerValue;
 float floatValue;
+}
+
+
+int main (void)
+{
+    yyin = fopen("test.txt", "r+");
+    if (yyin == NULL)
+    {
+        printf("File not found\n");
+        return 1;
+    }
+    else
+    {
+        printf(">>> Test.txt ...\n\n");
+        FILE *testFile;
+        char ch;
+        testFile= fopen("test.txt", "r");
+        while ((ch = fgetc(testFile)) != EOF)
+        {
+            printf("%c", ch);
+        }
+        yyparse();
+    }
+    fclose(yyin);
+    return 0;
 }
 
