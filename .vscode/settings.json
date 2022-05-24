@@ -1,0 +1,7 @@
+{
+    "FSharp.suggestGitignore": false,
+    "files.associations": {
+        "typeinfo": "cpp",
+        "iosfwd": "cpp"
+    }
+}

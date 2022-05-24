@@ -68,19 +68,23 @@
 /* Copy the first part of user declarations.  */
 
 /* Line 189 of yacc.c  */
-#line 1 "parser.y"
+#line 5 "parser.y"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
-extern FILE* yyin;
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include "symbol.h"
+#include "statments.h"
 void yyerror(char *s);
 int yylex(void);
 
+ProgramNode* programptr = nullptr;
+
 
 /* Line 189 of yacc.c  */
-#line 84 "y.tab.c"
+#line 88 "y.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -100,6 +104,18 @@ int yylex(void);
 # define YYTOKEN_TABLE 0
 #endif
 
+/* "%code requires" blocks.  */
+
+/* Line 209 of yacc.c  */
+#line 1 "parser.y"
+
+    #include "symbol.h"
+#include "statments.h"
+
+
+
+/* Line 209 of yacc.c  */
+#line 119 "y.tab.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -221,17 +237,20 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 34 "parser.y"
+#line 47 "parser.y"
 
     char *stringValue;
     char charValue; 
     int integerValue;
     float floatValue;
+    ProgramNode* programptr_val;
+    Statement* statement_val;
+    DeclareVariableStatement* declare_variableStatement_val;
 
 
 
 /* Line 214 of yacc.c  */
-#line 235 "y.tab.c"
+#line 254 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -243,7 +262,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 247 "y.tab.c"
+#line 266 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -576,17 +595,17 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    48,    48,    49,    52,    54,    55,    56,    57,    58,
-      59,    60,    61,    62,    63,    64,    65,    66,    67,    70,
-      71,    73,    73,    73,    73,    73,    73,    75,    77,    77,
-      77,    77,    77,    79,    82,    83,    85,    86,    87,    89,
-      90,    93,    95,    97,    98,   100,   101,   103,   104,   108,
-     109,   110,   113,   114,   115,   118,   120,   122,   123,   127,
-     128,   129,   130,   131,   133,   133,   133,   133,   136,   139,
-     142,   143,   146,   147,   148,   150,   151,   152,   154,   155,
-     156,   157,   158,   161,   162,   163,   164,   165,   166,   167,
-     168,   169,   170,   171,   172,   173,   174,   175,   176,   177,
-     178
+       0,    61,    61,    67,    70,    72,    73,    74,    75,    76,
+      77,    78,    79,    80,    81,    82,    83,    84,    85,    89,
+      90,    92,    92,    92,    92,    92,    92,    94,    96,    96,
+      96,    96,    96,    98,   101,   102,   104,   105,   106,   108,
+     109,   112,   114,   116,   117,   119,   120,   122,   123,   127,
+     128,   129,   132,   133,   134,   137,   139,   141,   142,   146,
+     147,   148,   149,   150,   152,   152,   152,   152,   155,   158,
+     161,   162,   165,   166,   167,   169,   170,   171,   173,   174,
+     175,   176,   177,   180,   181,   182,   183,   184,   185,   186,
+     187,   188,   189,   190,   191,   192,   193,   194,   195,   196,
+     197
 };
 #endif
 
@@ -1726,10 +1745,35 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-      
+        case 2:
 
 /* Line 1455 of yacc.c  */
-#line 1733 "y.tab.c"
+#line 62 "parser.y"
+    {
+ (yyval.programptr_val) = new ProgramNode();
+ if (programptr == nullptr){programptr = (yyval.programptr_val);programptr->is_main = true;}
+ (yyvsp[(1) - (2)].programptr_val)->appendStatement((yyvsp[(1) - (2)].programptr_val));
+}
+    break;
+
+  case 3:
+
+/* Line 1455 of yacc.c  */
+#line 67 "parser.y"
+    {(yyval.programptr_val)->appendStatement((yyvsp[(1) - (1)].statement_val));}
+    break;
+
+  case 19:
+
+/* Line 1455 of yacc.c  */
+#line 89 "parser.y"
+    { (yyval.declare_variableStatement_val) = new DeclareVariableStatement((yyvsp[(1) - (3)].stringValue),(yyvsp[(2) - (3)].stringValue));}
+    break;
+
+
+
+/* Line 1455 of yacc.c  */
+#line 1777 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1941,13 +1985,23 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 181 "parser.y"
+#line 200 "parser.y"
 
-void yyerror (char* s)
+int yyerror (string s)
 {
     printf("%s\n", s);
+    extern compileContext* compile_context;
+    return 1;
 }
-int main (void)
+int yyerror (const char* s)
+{
+return yyerror(string(s));
+}
+/* int yyerror (char* s)
+{
+return yyerror(string(s));
+} */
+/* int main (void)
 {
 
     yyin = fopen("test.txt", "r");
@@ -1970,6 +2024,6 @@ int main (void)
     }
     fclose(yyin);
     return 0;
-}
+} */
 
 

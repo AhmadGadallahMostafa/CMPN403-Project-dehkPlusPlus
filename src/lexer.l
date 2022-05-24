@@ -4,6 +4,8 @@
     #include <stdarg.h>
     #include <string.h>
     #include "y.tab.h"
+    #include "symbol.h"
+#include "statments.h"
 %}
 
 /*Here we will define our tokens and rules for each token  
@@ -46,7 +48,7 @@ false   {return BOOL_VALUE_FALSE;}
 #.*#    {return COMMENT;}
 
  /*Identifiers*/
-[a-zA-Z_][a-zA-Z0-9_]* {return IDENTIFIER;}
+[a-zA-Z_][a-zA-Z0-9_]* {yylval.stringValue = yytext; return IDENTIFIER;}
 
  /*Math Operators*/
 \= {return ASSIGN;}
