@@ -60,11 +60,15 @@ ProgramNode* programptr = nullptr;
 program : 
 program statement           
 {
+ if (programptr == nullptr){programptr = new ProgramNode();programptr->is_main = true;}
+ $1->appendStatement($2);
+}
+| statement                 
+{
  $<programptr_val>$ = new ProgramNode();
  if (programptr == nullptr){programptr = $<programptr_val>$;programptr->is_main = true;}
- $1->appendStatement($1);
+ $<programptr_val>$->appendStatement($1);   
 }
-| statement                 {$$->appendStatement($1);}
 ;
 
 statement: expr;
@@ -86,7 +90,10 @@ expr: variable_declaration
 
  /*Variable declerations*/
 variable_declaration: 
-variable_type IDENTIFIER SEMICOLON          { $$ = new DeclareVariableStatement($1,$2);}
+variable_type IDENTIFIER SEMICOLON          
+{ 
+    $$ = new DeclareVariableStatement($1,$2);
+}
 | variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON;
 
 CONST_VALUE: INT_VALUE | FLOAT_VALUE | STRING_VALUE | CHAR_VALUE | BOOL_VALUE_TRUE | BOOL_VALUE_FALSE;
@@ -198,16 +205,11 @@ math_expr: math_expr OR math_expr
 ;
 
 %%
-int yyerror (string s)
+void yyerror (char* s)
 {
     printf("%s\n", s);
-    extern compileContext* compile_context;
-    return 1;
 }
-int yyerror (const char* s)
-{
-return yyerror(string(s));
-}
+
 /* int yyerror (char* s)
 {
 return yyerror(string(s));

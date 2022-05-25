@@ -595,17 +595,17 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    61,    61,    67,    70,    72,    73,    74,    75,    76,
-      77,    78,    79,    80,    81,    82,    83,    84,    85,    89,
-      90,    92,    92,    92,    92,    92,    92,    94,    96,    96,
-      96,    96,    96,    98,   101,   102,   104,   105,   106,   108,
-     109,   112,   114,   116,   117,   119,   120,   122,   123,   127,
-     128,   129,   132,   133,   134,   137,   139,   141,   142,   146,
-     147,   148,   149,   150,   152,   152,   152,   152,   155,   158,
-     161,   162,   165,   166,   167,   169,   170,   171,   173,   174,
-     175,   176,   177,   180,   181,   182,   183,   184,   185,   186,
-     187,   188,   189,   190,   191,   192,   193,   194,   195,   196,
-     197
+       0,    61,    61,    67,    76,    78,    79,    80,    81,    82,
+      83,    84,    85,    86,    87,    88,    89,    90,    91,    95,
+     101,   103,   103,   103,   103,   103,   103,   105,   107,   107,
+     107,   107,   107,   109,   112,   113,   115,   116,   117,   119,
+     120,   123,   125,   127,   128,   130,   131,   133,   134,   138,
+     139,   140,   143,   144,   145,   148,   150,   152,   153,   157,
+     158,   159,   160,   161,   163,   163,   163,   163,   166,   169,
+     172,   173,   176,   177,   178,   180,   181,   182,   184,   185,
+     186,   187,   188,   191,   192,   193,   194,   195,   196,   197,
+     198,   199,   200,   201,   202,   203,   204,   205,   206,   207,
+     208
 };
 #endif
 
@@ -1750,30 +1750,39 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 62 "parser.y"
     {
- (yyval.programptr_val) = new ProgramNode();
- if (programptr == nullptr){programptr = (yyval.programptr_val);programptr->is_main = true;}
- (yyvsp[(1) - (2)].programptr_val)->appendStatement((yyvsp[(1) - (2)].programptr_val));
+ if (programptr == nullptr){programptr = new ProgramNode();programptr->is_main = true;}
+ (yyvsp[(1) - (2)].programptr_val)->appendStatement((yyvsp[(2) - (2)].statement_val));
+ //printf("Variable delcared from prog statment rule\n"); 
 }
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 67 "parser.y"
-    {(yyval.programptr_val)->appendStatement((yyvsp[(1) - (1)].statement_val));}
+#line 68 "parser.y"
+    {
+ (yyval.programptr_val) = new ProgramNode();
+ if (programptr == nullptr){programptr = (yyval.programptr_val);programptr->is_main = true;}
+ (yyval.programptr_val)->appendStatement((yyvsp[(1) - (1)].statement_val));   
+ //printf("Variable delcared from statment rule\n"); 
+}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 89 "parser.y"
-    { (yyval.declare_variableStatement_val) = new DeclareVariableStatement((yyvsp[(1) - (3)].stringValue),(yyvsp[(2) - (3)].stringValue));}
+#line 96 "parser.y"
+    { 
+    printf("Type is %s\n", (yyvsp[(1) - (3)].stringValue));
+    printf("Name is %s\n", (yyvsp[(2) - (3)].stringValue));
+    (yyval.declare_variableStatement_val) = new DeclareVariableStatement((yyvsp[(1) - (3)].stringValue),(yyvsp[(2) - (3)].stringValue));
+}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1777 "y.tab.c"
+#line 1786 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1985,18 +1994,13 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 200 "parser.y"
+#line 211 "parser.y"
 
-int yyerror (string s)
+void yyerror (char* s)
 {
     printf("%s\n", s);
-    extern compileContext* compile_context;
-    return 1;
 }
-int yyerror (const char* s)
-{
-return yyerror(string(s));
-}
+
 /* int yyerror (char* s)
 {
 return yyerror(string(s));

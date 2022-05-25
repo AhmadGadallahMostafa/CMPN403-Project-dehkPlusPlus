@@ -2,7 +2,14 @@
 
 SymbolTable::SymbolTable(SymbolTable* parent)
 {
-    this->parent = parent;
+    if(parent == nullptr)
+    {
+        this->parent = nullptr;
+    }
+    else
+    {
+        this->parent = parent;
+    }
 }
 
 

@@ -51,12 +51,7 @@ class ProgramNode : public Statement
 {
 public:
 	vector<Statement*> statments;
-	bool is_main;
-	ProgramNode()
-	{
-		this->statments = vector<Statement*>();
-		this->is_main = false;
-	}
+	bool is_main = false;
 	virtual string compile(compileContext& compile_context) const override;
 	inline void appendStatement(Statement* statement)
 	{

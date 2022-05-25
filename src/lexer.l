@@ -14,12 +14,12 @@
 %%
 
  /*First we will define the datatypes of the variables, defined first as to be of the highest priority */
-int {return INT;}
-float {return FLOAT;}
-char {return CHAR;}
-string {return STRING;}
-bool {return BOOL;}
-void {return VOID;}
+int {yylval.stringValue = "int"; return INT;}
+float {yylval.stringValue = "float"; return FLOAT;}
+char { yylval.stringValue = "char";return CHAR;}
+string { yylval.stringValue = "string";return STRING;}
+bool { yylval.stringValue = "bool";return BOOL;}
+void { yylval.stringValue = "void";return VOID;}
 
  /*Resereved keywords for the programming lang, we will not allow for users to use reserved keywords as identifiers later on */
 for {return FOR;}

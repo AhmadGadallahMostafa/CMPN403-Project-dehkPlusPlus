@@ -6,7 +6,7 @@ using namespace std;
 int yyparse();
 extern "C" int yylex();
 extern FILE* yyin;
-extern ProgramNode* program;
+extern ProgramNode* programptr;
 compileContext compile_context = {nullptr, stack<SymbolTable*>()};
 int main()
 {
@@ -17,7 +17,7 @@ int main()
     {
         cout << "Parsing successful" << endl;
         cout << "Compiling..." << endl;
-        program->compile(compile_context);
+        cout<<programptr->compile(compile_context);
     }
     else
     {

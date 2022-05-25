@@ -1,2 +1,6 @@
-int x = 5;
-char asd123;
+int x;
+float y;
+char y;
+int a;
+float sas;
+int asd;
