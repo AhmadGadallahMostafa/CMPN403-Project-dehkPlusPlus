@@ -1,17 +1,25 @@
+%code requires{
+    #include "symbol.h"
+#include "statments.h"
+}
 %{
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
-extern FILE* yyin;
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include "symbol.h"
+#include "statments.h"
 void yyerror(char *s);
 int yylex(void);
+
+ProgramNode* programptr = nullptr;
 %}
 
-%token INT FLOAT STRING CHAR BOOL VOID
+%token <stringValue>INT FLOAT STRING CHAR BOOL VOID
 %token FOR WHILE DO BREAK CONTINUE IF ELSE ELSEIF SWITCH CASE DEFAULT CONSTANT RETURN DEF
 %token INT_VALUE FLOAT_VALUE STRING_VALUE CHAR_VALUE BOOL_VALUE_TRUE BOOL_VALUE_FALSE COMMENT
-%token IDENTIFIER
+%token <stringValue>IDENTIFIER
 %token ASSIGN PLUS MINUS TIMES DIVIDE MODULUS EXPONENT
 %token AND OR NOT
 %token EQUAL NOTEQUAL GREATER_THAN GREATER_THAN_EQUAL LESS_THAN LESS_THAN_EQUAL
@@ -29,6 +37,11 @@ int yylex(void);
 %left TIMES DIVIDE MODULUS
 %right EXPONENT
 
+%start program
+%type <programptr_val> program
+%type <statement_val> statement
+%type <declare_variableStatement_val> variable_declaration
+%type <stringValue> variable_type
 
 
 %union{
@@ -36,17 +49,26 @@ int yylex(void);
     char charValue; 
     int integerValue;
     float floatValue;
+    ProgramNode* programptr_val;
+    Statement* statement_val;
+    DeclareVariableStatement* declare_variableStatement_val;
 }
 
-
-
-
-
  /*Defining the grammar */
-%start program
+
 %%
-program : program statement 
-| statement
+program : 
+program statement           
+{
+ if (programptr == nullptr){programptr = new ProgramNode();programptr->is_main = true;}
+ $1->appendStatement($2);
+}
+| statement                 
+{
+ $<programptr_val>$ = new ProgramNode();
+ if (programptr == nullptr){programptr = $<programptr_val>$;programptr->is_main = true;}
+ $<programptr_val>$->appendStatement($1);   
+}
 ;
 
 statement: expr;
@@ -67,7 +89,11 @@ expr: variable_declaration
 | COMMENT
 
  /*Variable declerations*/
-variable_declaration: variable_type IDENTIFIER SEMICOLON
+variable_declaration: 
+variable_type IDENTIFIER SEMICOLON          
+{ 
+    $$ = new DeclareVariableStatement($1,$2);
+}
 | variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON;
 
 CONST_VALUE: INT_VALUE | FLOAT_VALUE | STRING_VALUE | CHAR_VALUE | BOOL_VALUE_TRUE | BOOL_VALUE_FALSE;
@@ -183,7 +209,12 @@ void yyerror (char* s)
 {
     printf("%s\n", s);
 }
-int main (void)
+
+/* int yyerror (char* s)
+{
+return yyerror(string(s));
+} */
+/* int main (void)
 {
 
     yyin = fopen("test.txt", "r");
@@ -206,5 +237,5 @@ int main (void)
     }
     fclose(yyin);
     return 0;
-}
+} */
 

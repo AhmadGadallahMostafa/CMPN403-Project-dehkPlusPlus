@@ -1,0 +1,6 @@
+int x;
+float y;
+char y;
+int a;
+float sas;
+int asd;
