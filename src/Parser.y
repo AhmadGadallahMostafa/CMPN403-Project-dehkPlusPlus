@@ -13,6 +13,7 @@
 void yyerror(char *s);
 int yylex(void);
 
+
 ProgramNode* programptr = nullptr;
 %}
 
@@ -42,6 +43,10 @@ ProgramNode* programptr = nullptr;
 %type <statement_val> statement
 %type <declare_variableStatement_val> variable_declaration
 %type <stringValue> variable_type
+%type <parameter_val> parameter
+%type <parameter_list_val> parameter_list
+%type <declare_functionStatement_val> function_declaration
+%type <block_node_val> block
 
 
 %union{
@@ -52,31 +57,51 @@ ProgramNode* programptr = nullptr;
     ProgramNode* programptr_val;
     Statement* statement_val;
     DeclareVariableStatement* declare_variableStatement_val;
+    parameter* parameter_val;
+    ParameterList* parameter_list_val;
+    DeclareFunctionStatement* declare_functionStatement_val;
+    BlockNode* block_node_val;
 }
 
  /*Defining the grammar */
 
 %%
 program : 
+
 program statement           
 {
- if (programptr == nullptr){programptr = new ProgramNode();programptr->is_main = true;}
- $1->appendStatement($2);
+  $1->appendStatement($2);
 }
-| statement                 
+|
 {
- $<programptr_val>$ = new ProgramNode();
- if (programptr == nullptr){programptr = $<programptr_val>$;programptr->is_main = true;}
- $<programptr_val>$->appendStatement($1);   
+  $$ = new ProgramNode();
+  if (programptr == nullptr)
+  {
+    programptr = $$;
+    programptr -> is_main = true;
+  }
+}
+/* |
+statement
+{
+  printf("stmt\n");
+} */
+;
+
+block:
+LEFT_BRACE program RIGHT_BRACE
+{
+  $$ = new BlockNode($2);
 }
 ;
 
 statement: expr;
 
-expr: variable_declaration
+expr: 
+  function_declaration
 | const_variable_declaration
 | variable_assignment
-| function_declaration
+| variable_declaration
 | function_call
 | if_statement
 | do_statement
@@ -86,13 +111,15 @@ expr: variable_declaration
 | continue_statement
 | return_statement
 | for_statement
+| block
 | COMMENT
 
  /*Variable declerations*/
 variable_declaration: 
-variable_type IDENTIFIER SEMICOLON          
+variable_type IDENTIFIER SEMICOLON     
 { 
     $$ = new DeclareVariableStatement($1,$2);
+    printf("Found var declaration \n");
 }
 | variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON;
 
@@ -105,14 +132,26 @@ variable_type: INT | FLOAT | STRING | CHAR | BOOL;
 variable_assignment: IDENTIFIER ASSIGN condtional_expr SEMICOLON;
 
  /*Function declarations */
-function_declaration: DEF variable_type IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE
-| DEF VOID IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE SEMICOLON;
+function_declaration:
+  DEF variable_type IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN block
+  {
+    $$ = new DeclareFunctionStatement($2,$3,$5,$7);
+    printf("Found function declaration \n");
+  }
+| DEF VOID IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN block SEMICOLON;
 
-parameter_list: parameter_list COMMA parameter
-| parameter
+parameter_list: 
+  parameter_list COMMA parameter 
+  {
+    $$->appendParameter($3);
+  }
+| parameter                       {$$ = new ParameterList();$$->appendParameter($1);}
+  
 | ;
 
-parameter: variable_type IDENTIFIER
+parameter: 
+  variable_type IDENTIFIER                              {$$ = new parameter($1,$2);
+  printf("Found parameter\n");}
 | variable_type IDENTIFIER ASSIGN condtional_expr;
 
 /*Function call*/

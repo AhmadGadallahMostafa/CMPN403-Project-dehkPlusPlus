@@ -14,18 +14,19 @@ SymbolTable::SymbolTable(SymbolTable* parent)
 
 
 
-void SymbolTable::addSymbol(symbol* s)
+string SymbolTable::addSymbol(symbol* s)
 {
     //check if the symbol already exists
     if (table.find(s->name) != table.end())
     {
         //if variable is already declared
-        throw "Error: variable " + s->name + " already declared";
+        return "Error: variable " + s->name + " already declared";
     }
     else
     {
         //if it doesn't, add it to the table
         table[s->name] = s;
+        return "variable " + s->name + " declared \n";
     }
 }
 symbol* SymbolTable::getSymbol(string name)
@@ -53,6 +54,6 @@ void SymbolTable::print()
 {
     for (auto it = table.begin(); it != table.end(); it++)
     {
-        cout << it->first << " " << it->second->symbolType << " " << it->second->value << endl;
+        cout << it->first << " " << it->second->symbolType << " " << it->second->line << " " << it->second->column << endl;
     }
 }

@@ -39,16 +39,16 @@ def {return DEF;}
 
 
  /*Constants*/
-[0-9]+  {yylval.integerValue = atoi(yytext); return INT_VALUE;}
-[0-9]+\.[0-9]+  { yylval.floatValue = atof(yytext); return FLOAT_VALUE;}
-["]([^\n\t\r\f\v\ ])*["]  {yylval.stringValue = yytext; return STRING_VALUE;}
+[0-9]+  {yylval.integerValue = atoi(strdup(yytext)); return INT_VALUE;}
+[0-9]+\.[0-9]+  { yylval.floatValue = atof(strdup(yytext)); return FLOAT_VALUE;}
+["]([^\n\t\r\f\v\ ])*["]  {yylval.stringValue = strdup(yytext); return STRING_VALUE;}
 [']([^\n\t\r\f\v\ ])['] { yylval.charValue = yytext[1]; return CHAR_VALUE;}
 true    {return BOOL_VALUE_TRUE;}
 false   {return BOOL_VALUE_FALSE;}
 #.*#    {return COMMENT;}
 
  /*Identifiers*/
-[a-zA-Z_][a-zA-Z0-9_]* {yylval.stringValue = yytext; return IDENTIFIER;}
+[a-zA-Z_][a-zA-Z0-9_]* {yylval.stringValue = strdup(yytext); return IDENTIFIER;}
 
  /*Math Operators*/
 \= {return ASSIGN;}

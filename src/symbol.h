@@ -9,7 +9,6 @@ struct symbol
 {
     string name;
     string symbolType;
-    string value;
     int line;
     int column;
 };
@@ -20,8 +19,25 @@ struct variable : public symbol
     bool isInitialized = false;
     string type;
     bool isConst;
+    string value;
 };
 
+struct parameter : public symbol
+{
+    string type;
+    parameter(string type, string name):symbol()
+    {
+        symbolType = "parameter";
+        this->type = type;
+        this->name = name;
+    }
+};
+
+struct function : symbol
+{
+    string returnType;
+    vector<parameter*> parameters;
+};
 
 class SymbolTable
 {
@@ -30,7 +46,7 @@ private:
     SymbolTable* parent;
 public:
     SymbolTable(SymbolTable* parent);
-    void addSymbol(symbol* s);
+    string addSymbol(symbol* s);
     symbol* getSymbol(string name);
     void print();
 };

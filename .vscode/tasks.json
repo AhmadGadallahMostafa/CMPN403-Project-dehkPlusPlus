@@ -4,19 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "echo",
             "type": "shell",
-            "command": "g++",
-            "args": [
-                "-o",
-                "${workspaceFolder}/a.exe",
-                "-g",
-                "lex.yy.c",
-                "y.tab.c",
-                "main.cpp",
-                "symbol.cpp",
-                "statement.cpp"
-            ],
+            "command": "echo Hello"
         }
     ]
 }
