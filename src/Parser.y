@@ -21,7 +21,7 @@ ProgramNode* programptr = nullptr;
 %token FOR WHILE DO BREAK CONTINUE IF ELSE ELSEIF SWITCH CASE DEFAULT CONSTANT RETURN DEF
 %token INT_VALUE FLOAT_VALUE STRING_VALUE CHAR_VALUE BOOL_VALUE_TRUE BOOL_VALUE_FALSE COMMENT
 %token <stringValue>IDENTIFIER
-%token ASSIGN PLUS MINUS TIMES DIVIDE MODULUS EXPONENT
+%token ASSIGN <stringValue>PLUS MINUS TIMES DIVIDE MODULUS EXPONENT
 %token AND OR NOT
 %token EQUAL NOTEQUAL GREATER_THAN GREATER_THAN_EQUAL LESS_THAN LESS_THAN_EQUAL
 %token LEFT_PAREN RIGHT_PAREN LEFT_BRACE RIGHT_BRACE COMMA SEMICOLON COLON
@@ -47,6 +47,9 @@ ProgramNode* programptr = nullptr;
 %type <parameter_list_val> parameter_list
 %type <declare_functionStatement_val> function_declaration
 %type <block_node_val> block
+%type <conditional_expr_statement_val> condtional_expr
+%type <math_expr_statement_val> math_expr
+
 
 
 %union{
@@ -60,7 +63,9 @@ ProgramNode* programptr = nullptr;
     parameter* parameter_val;
     ParameterList* parameter_list_val;
     DeclareFunctionStatement* declare_functionStatement_val;
-    BlockNode* block_node_val;
+    BlockStatement* block_node_val;
+    ConditionalExprStatement* conditional_expr_statement_val;
+    MathExprStatement* math_expr_statement_val;
 }
 
  /*Defining the grammar */
@@ -91,7 +96,7 @@ statement
 block:
 LEFT_BRACE program RIGHT_BRACE
 {
-  $$ = new BlockNode($2);
+  $$ = new BlockStatement($2);
 }
 ;
 
@@ -101,7 +106,7 @@ expr:
   function_declaration
 | const_variable_declaration
 | variable_assignment
-| variable_declaration
+| variable_declaration //$$ 
 | function_call
 | if_statement
 | do_statement
@@ -115,13 +120,17 @@ expr:
 | COMMENT
 
  /*Variable declerations*/
-variable_declaration: 
+variable_declaration:
 variable_type IDENTIFIER SEMICOLON     
 { 
-    $$ = new DeclareVariableStatement($1,$2);
+    $$ = new DeclareVariableStatement($1,$2, nullptr);
     printf("Found var declaration \n");
 }
-| variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON;
+| variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON
+{
+    $$ = new DeclareVariableStatement($1,$2, $4);
+    printf("Found var declaration with assing\n");
+};
 
 CONST_VALUE: INT_VALUE | FLOAT_VALUE | STRING_VALUE | CHAR_VALUE | BOOL_VALUE_TRUE | BOOL_VALUE_FALSE;
 
@@ -184,7 +193,8 @@ while_statement: WHILE LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program
 
 do_statement: DO LEFT_BRACE program RIGHT_BRACE WHILE LEFT_PAREN condtional_expr RIGHT_PAREN SEMICOLON;
 
-condtional_expr: math_expr
+condtional_expr: 
+  math_expr               {$$ = $1;}
 | function_call_in_expr
 ;
 
@@ -232,14 +242,14 @@ math_expr: math_expr OR math_expr
 | math_expr GREATER_THAN_EQUAL math_expr
 | math_expr LESS_THAN math_expr
 | math_expr LESS_THAN_EQUAL math_expr
-| math_expr PLUS math_expr
+| math_expr PLUS math_expr                {$$ = new MathExprStatement($2,$1,$3,false,"");}
 | math_expr MINUS math_expr
 | math_expr TIMES math_expr
 | math_expr DIVIDE math_expr
 | math_expr MODULUS math_expr
 | math_expr EXPONENT math_expr
 | LEFT_PAREN math_expr RIGHT_PAREN
-| IDENTIFIER
+| IDENTIFIER                                {$$=new MathExprStatement("",nullptr,nullptr,true,$1);printf("assigntment\n");}
 | CONST_VALUE
 ;
 

@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include "Result.h"
 using namespace std;
 
 struct symbol
@@ -33,11 +34,12 @@ struct parameter : public symbol
     }
 };
 
-struct function : symbol
+struct functionSymbol : symbol
 {
     string returnType;
     vector<parameter*> parameters;
 };
+
 
 class SymbolTable
 {
@@ -46,8 +48,9 @@ private:
     SymbolTable* parent;
 public:
     SymbolTable(SymbolTable* parent);
-    string addSymbol(symbol* s);
+    Result addSymbol(symbol* s);
     symbol* getSymbol(string name);
+    void removeSymbol(string name);
     void print();
 };
 

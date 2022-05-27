@@ -14,19 +14,19 @@ SymbolTable::SymbolTable(SymbolTable* parent)
 
 
 
-string SymbolTable::addSymbol(symbol* s)
+Result SymbolTable::addSymbol(symbol* s)
 {
     //check if the symbol already exists
     if (table.find(s->name) != table.end())
     {
         //if variable is already declared
-        return "Error: variable " + s->name + " already declared";
+        return Result("", "Symbol already declared in same scope", true);
     }
     else
     {
         //if it doesn't, add it to the table
         table[s->name] = s;
-        return "variable " + s->name + " declared \n";
+        return Result ("Symbol %s added", "", false);
     }
 }
 symbol* SymbolTable::getSymbol(string name)
@@ -54,6 +54,26 @@ void SymbolTable::print()
 {
     for (auto it = table.begin(); it != table.end(); it++)
     {
-        cout << it->first << " " << it->second->symbolType << " " << it->second->line << " " << it->second->column << endl;
+        if (it->second->symbolType == "variable")
+        {
+            variable* v = (variable*)it->second;
+            cout << "variable " << it->first << " " << v->type << " " << v->isConst << " " << v->value << endl;
+        }
+        else if (it->second->symbolType == "functionSymbol")
+        {
+            functionSymbol* f = (functionSymbol*)it->second;
+            cout << "functionSymbol " << it->first << " " << f->returnType << endl;
+        }
+        else if (it->second->symbolType == "parameter")
+        {
+            parameter* p = (parameter*)it->second;
+            cout << "parameter " << it->first << " " << p->type << endl;
+        }
+        //cout << it->first << " " << it->second->symbolType << " " << it->second->line << " " << it->second->column << endl;
     }
+}
+
+void SymbolTable::removeSymbol(string name)
+{
+    table.erase(name);
 }

@@ -6,6 +6,9 @@
 #include <cstring>
 #include "symbol.h"
 #include<stack>
+#include "Result.h"
+#include <regex>
+
 using namespace std;
 
 struct compileContext
@@ -44,13 +47,15 @@ struct compileContext
 	}
 };
 
+class ConditionalExprStatement;	
 
 class Statement
 {
 private:
     /* data */
 public:
-    virtual string compile(compileContext& compile_context) const = 0;
+    virtual Result compile(compileContext& compile_context) const = 0;
+	virtual void printQuadruple() const = 0;
 };
 
 class ProgramNode : public Statement
@@ -58,7 +63,8 @@ class ProgramNode : public Statement
 public:
 	vector<Statement*> statments;
 	bool is_main = false;
-	virtual string compile(compileContext& compile_context) const override;
+	virtual Result compile(compileContext& compile_context) const override;
+	virtual void printQuadruple() const override;
 	inline void appendStatement(Statement* statement)
 	{
 		statments.push_back(statement);
@@ -70,12 +76,15 @@ class DeclareVariableStatement : public Statement
 	public:
 	string type;
 	string name;
-	inline DeclareVariableStatement(string type, string name)
+	ConditionalExprStatement* assignment;
+	inline DeclareVariableStatement(string type, string name, ConditionalExprStatement* assignment)
 	{
 		this->type = type;
 		this->name = name;
+		this->assignment = assignment;
 	}
-	virtual string compile(compileContext& compile_context) const override;
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
 
 };
 
@@ -88,16 +97,17 @@ public:
 		parameters.push_back(parameter);
 	}
 };
-class BlockNode : public Statement
+class BlockStatement : public Statement
 
 {
 	public:
 	ProgramNode* programNode;
-	inline BlockNode(ProgramNode* programNode)
+	inline BlockStatement(ProgramNode* programNode)
 	{
 		this->programNode = programNode;
 	}
-	virtual string compile(compileContext& compile_context) const override;
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
 };
 class DeclareFunctionStatement : public Statement
 {
@@ -105,14 +115,46 @@ class DeclareFunctionStatement : public Statement
 	string returnType;
 	string name;
 	ParameterList* parameters;
-	BlockNode* blockNode;
-	inline DeclareFunctionStatement(string returnType, string name, ParameterList* parameters, BlockNode* block)
+	BlockStatement* blockNode;
+	inline DeclareFunctionStatement(string returnType, string name, ParameterList* parameters, BlockStatement* block)
 	{
 		this->returnType = returnType;
 		this->name = name;
 		this->parameters = parameters;
 		this->blockNode = block;
 	}
-	virtual string compile(compileContext& compile_context) const override;
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
 };
 
+class ConditionalExprStatement : public Statement
+{
+};
+
+class MathExprStatement : public ConditionalExprStatement
+{
+	public:
+	string op;
+	MathExprStatement* left;
+	MathExprStatement* right;
+	string identifier;
+	bool is_identifier;
+
+	inline MathExprStatement(string op, MathExprStatement* left, MathExprStatement* right, bool is_identifier, string identifier)
+	{
+		this->op = op;
+		this->left = left;
+		this->right = right;
+		this->is_identifier = is_identifier;
+		this->identifier = identifier;
+	}
+	// inline string toString()
+	// {
+	// 	if(is_identifier)
+	// 		return left;
+	// 	else
+	// 		return left + " " + op + " " + right;
+	// }
+	void printQuadruple() const override;
+	virtual Result compile(compileContext& compile_context) const override;
+};

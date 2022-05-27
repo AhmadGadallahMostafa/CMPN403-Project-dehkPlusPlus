@@ -1,6 +1,4 @@
-int a2;
-int a2;
-def int fun1(int a, int b)
-{
-    int a2;
-}
+int a;
+int b;
+int s;
+int c = a+b+s;

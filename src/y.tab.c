@@ -238,7 +238,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 52 "parser.y"
+#line 55 "parser.y"
 
     char *stringValue;
     char charValue; 
@@ -250,12 +250,14 @@ typedef union YYSTYPE
     parameter* parameter_val;
     ParameterList* parameter_list_val;
     DeclareFunctionStatement* declare_functionStatement_val;
-    BlockNode* block_node_val;
+    BlockStatement* block_node_val;
+    ConditionalExprStatement* conditional_expr_statement_val;
+    MathExprStatement* math_expr_statement_val;
 
 
 
 /* Line 214 of yacc.c  */
-#line 259 "y.tab.c"
+#line 261 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -267,7 +269,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 271 "y.tab.c"
+#line 273 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -600,17 +602,17 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    71,    71,    77,    93,    99,   102,   103,   104,   105,
-     106,   107,   108,   109,   110,   111,   112,   113,   114,   115,
-     116,   120,   125,   127,   127,   127,   127,   127,   127,   129,
-     131,   131,   131,   131,   131,   133,   137,   142,   145,   149,
-     151,   154,   156,   159,   161,   163,   164,   166,   167,   169,
-     170,   174,   175,   176,   179,   180,   181,   184,   186,   188,
-     189,   193,   194,   195,   196,   197,   199,   199,   199,   199,
-     202,   205,   208,   209,   212,   213,   214,   216,   217,   218,
-     220,   221,   222,   223,   224,   227,   228,   229,   230,   231,
-     232,   233,   234,   235,   236,   237,   238,   239,   240,   241,
-     242,   243,   244
+       0,    76,    76,    81,    97,   103,   106,   107,   108,   109,
+     110,   111,   112,   113,   114,   115,   116,   117,   118,   119,
+     120,   124,   129,   135,   135,   135,   135,   135,   135,   137,
+     139,   139,   139,   139,   139,   141,   145,   150,   153,   157,
+     159,   162,   164,   167,   169,   171,   172,   174,   175,   177,
+     178,   182,   183,   184,   187,   188,   189,   192,   194,   197,
+     198,   202,   203,   204,   205,   206,   208,   208,   208,   208,
+     211,   214,   217,   218,   221,   222,   223,   225,   226,   227,
+     229,   230,   231,   232,   233,   236,   237,   238,   239,   240,
+     241,   242,   243,   244,   245,   246,   247,   248,   249,   250,
+     251,   252,   253
 };
 #endif
 
@@ -1742,17 +1744,16 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 72 "parser.y"
+#line 77 "parser.y"
     {
   (yyvsp[(1) - (2)].programptr_val)->appendStatement((yyvsp[(2) - (2)].statement_val));
-
 }
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 77 "parser.y"
+#line 81 "parser.y"
     {
   (yyval.programptr_val) = new ProgramNode();
   if (programptr == nullptr)
@@ -1766,26 +1767,36 @@ yyreduce:
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 94 "parser.y"
+#line 98 "parser.y"
     {
-  (yyval.block_node_val) = new BlockNode((yyvsp[(2) - (3)].programptr_val));
+  (yyval.block_node_val) = new BlockStatement((yyvsp[(2) - (3)].programptr_val));
 }
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 121 "parser.y"
+#line 125 "parser.y"
     { 
-    (yyval.declare_variableStatement_val) = new DeclareVariableStatement((yyvsp[(1) - (3)].stringValue),(yyvsp[(2) - (3)].stringValue));
+    (yyval.declare_variableStatement_val) = new DeclareVariableStatement((yyvsp[(1) - (3)].stringValue),(yyvsp[(2) - (3)].stringValue), nullptr);
     printf("Found var declaration \n");
+}
+    break;
+
+  case 22:
+
+/* Line 1455 of yacc.c  */
+#line 130 "parser.y"
+    {
+    (yyval.declare_variableStatement_val) = new DeclareVariableStatement((yyvsp[(1) - (5)].stringValue),(yyvsp[(2) - (5)].stringValue), (yyvsp[(4) - (5)].conditional_expr_statement_val));
+    printf("Found var declaration with assing\n");
 }
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 138 "parser.y"
+#line 146 "parser.y"
     {
     (yyval.declare_functionStatement_val) = new DeclareFunctionStatement((yyvsp[(2) - (7)].stringValue),(yyvsp[(3) - (7)].stringValue),(yyvsp[(5) - (7)].parameter_list_val),(yyvsp[(7) - (7)].block_node_val));
     printf("Found function declaration \n");
@@ -1795,7 +1806,7 @@ yyreduce:
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 146 "parser.y"
+#line 154 "parser.y"
     {
     (yyval.parameter_list_val)->appendParameter((yyvsp[(3) - (3)].parameter_val));
   }
@@ -1804,22 +1815,43 @@ yyreduce:
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 149 "parser.y"
+#line 157 "parser.y"
     {(yyval.parameter_list_val) = new ParameterList();(yyval.parameter_list_val)->appendParameter((yyvsp[(1) - (1)].parameter_val));}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 154 "parser.y"
+#line 162 "parser.y"
     {(yyval.parameter_val) = new parameter((yyvsp[(1) - (2)].stringValue),(yyvsp[(2) - (2)].stringValue));
   printf("Found parameter\n");}
+    break;
+
+  case 59:
+
+/* Line 1455 of yacc.c  */
+#line 197 "parser.y"
+    {(yyval.conditional_expr_statement_val) = (yyvsp[(1) - (1)].math_expr_statement_val);}
+    break;
+
+  case 94:
+
+/* Line 1455 of yacc.c  */
+#line 245 "parser.y"
+    {(yyval.math_expr_statement_val) = new MathExprStatement((yyvsp[(2) - (3)].stringValue),(yyvsp[(1) - (3)].math_expr_statement_val),(yyvsp[(3) - (3)].math_expr_statement_val),false,"");}
+    break;
+
+  case 101:
+
+/* Line 1455 of yacc.c  */
+#line 252 "parser.y"
+    {(yyval.math_expr_statement_val)=new MathExprStatement("",nullptr,nullptr,true,(yyvsp[(1) - (1)].stringValue));printf("assigntment\n");}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1823 "y.tab.c"
+#line 1855 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2031,7 +2063,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 247 "parser.y"
+#line 256 "parser.y"
 
 void yyerror (char* s)
 {

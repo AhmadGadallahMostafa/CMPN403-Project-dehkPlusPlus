@@ -165,7 +165,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 52 "parser.y"
+#line 55 "parser.y"
 
     char *stringValue;
     char charValue; 
@@ -177,12 +177,14 @@ typedef union YYSTYPE
     parameter* parameter_val;
     ParameterList* parameter_list_val;
     DeclareFunctionStatement* declare_functionStatement_val;
-    BlockNode* block_node_val;
+    BlockStatement* block_node_val;
+    ConditionalExprStatement* conditional_expr_statement_val;
+    MathExprStatement* math_expr_statement_val;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 186 "y.tab.h"
+#line 188 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -1,6 +1,7 @@
 #include "symbol.h"
 #include "statments.h"
 #include <fstream>
+#include "Result.h"
 
 using namespace std;
 int yyparse();
@@ -17,7 +18,8 @@ int main()
     {
         cout << "Parsing successful" << endl;
         cout << "Compiling..." << endl;
-        cout<<programptr->compile(compile_context);
+        programptr->compile(compile_context);
+        
         int i = 0;
         for (auto t: compile_context.tables)
         {

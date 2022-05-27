@@ -52,7 +52,7 @@ false   {return BOOL_VALUE_FALSE;}
 
  /*Math Operators*/
 \= {return ASSIGN;}
-\+ {return PLUS;}
+\+ {yylval.stringValue="+";return PLUS;}
 \- {return MINUS;}
 \* {return TIMES;}
 \/ {return DIVIDE;}
