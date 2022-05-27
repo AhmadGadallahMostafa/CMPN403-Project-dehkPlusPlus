@@ -6,6 +6,18 @@
 #include "Result.h"
 using namespace std;
 
+struct LiteralVal
+{
+    string type;
+    string value;
+    inline LiteralVal(string type, string value)
+    {
+        this->type = type;
+        this->value = value;
+    }
+};
+
+
 struct symbol
 {
     string name;

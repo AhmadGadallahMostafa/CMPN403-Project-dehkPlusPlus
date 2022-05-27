@@ -2,36 +2,54 @@
 
 Result DeclareVariableStatement::compile(compileContext& compile_context) const
 {
-	variable* symbol = new variable();
-	symbol->name = this->name;
-	symbol->symbolType = "variable";
-	symbol->type = this->type;
-	symbol->isConst = false;
+	variable* var = new variable();
+	var->name = this->name;
+	var->symbolType = "variable";
+	var->type = this->type;
+	var->isConst = this->is_const;
 	Result result = Result("","",false);
 	Result compileVarResult = Result("","",false);
 	if (this->assignment != nullptr)
 	{
-		symbol->isInitialized = true;
+		var->isInitialized = true;
 		Result compileAssignmentResult = this->assignment->compile(compile_context);
 		result.addResult(compileAssignmentResult);
-		if (compileAssignmentResult.isError())
+		if (result.isError())
 		{
-			return compileAssignmentResult;
+			return result;
 		}
 		else
 		{
 			MathExprStatement* mathExpr = (MathExprStatement*)this->assignment;
-			symbol->value = result.getResult();
-			compile_context.getTopTable()->removeSymbol(symbol->value);
-			
+			if(mathExpr->is_const_val)
+			{
+				if(mathExpr->literal_val->type != var->type)
+				{
+					result.setError("Type mismatch");
+					return result;
+				}
+			}
+			else
+			{
+				auto symbol = compile_context.getTopTable()->getSymbol(result.getResult());
+				variable* v = static_cast<variable*>(symbol);
+				if (v->type != var->type)
+				{
+					compile_context.getTopTable()->removeSymbol(v->name);
+					result.setError("Type mismatch");
+					return result;
+				}
+			}
+			var->value = result.getResult();
+			compile_context.getTopTable()->removeSymbol(var->value);
 		}
 	}
 	else
 	{
-		symbol->isInitialized = false;
+		var->isInitialized = false;
 	}
 	compileVarResult.addResult(result);
-	Result declareVarResult = compile_context.getTopTable()->addSymbol(symbol);
+	Result declareVarResult = compile_context.getTopTable()->addSymbol(var);
 	compileVarResult.addResult(declareVarResult);
 	return compileVarResult;
 }
@@ -163,7 +181,7 @@ Result MathExprStatement::compile(compileContext& compile_context) const
 	}
 	else if (is_const_val)
 	{
-		compileResult.setResult(this->op+this->identifier);
+		compileResult.setResult(this->op+this->literal_val->value);
 		return compileResult;
 	}
 	else 
@@ -185,9 +203,21 @@ Result MathExprStatement::compile(compileContext& compile_context) const
 	}
 	if (rightOperand == nullptr)
 	{
-		if (this->right->is_const_val)
+		if (this->right->is_const_val)	
 		{
-			compileResult.setResult(leftOperand->name+this->op + this->right->identifier);
+			variable* v = static_cast<variable*>(leftOperand);
+			if (v->type != this->right->literal_val->type)
+			{
+				compileResult.setError("Type mismatch");
+				return compileResult;
+			}
+			compileResult.setResult(leftOperand->name+this->op + this->right->literal_val->value);
+			variable* temp = new variable();
+			temp->name = leftOperand->name + this->op + this->right->literal_val->value;
+			temp->symbolType = "variable";
+			temp->type = v->type;
+			temp->isConst = false;
+			Result result = compile_context.getTopTable()->addSymbol(temp);
 			return compileResult;
 		}
 		else
@@ -218,14 +248,55 @@ Result MathExprStatement::compile(compileContext& compile_context) const
 
 void MathExprStatement::printQuadruple() const
 {
-	if (this->is_identifier)
+	if (is_identifier)
 	{
-		std::cout << "Assign " << this->identifier << " " << this->left->identifier << std::endl;
+		cout << "Identifier: " << this->identifier << endl;
+	}
+	else if (is_const_val)
+	{
+		cout << "Literal: " << this->literal_val->value << endl;
 	}
 	else
 	{
-		std::cout << "mov\teax, " << this->left->identifier << std::endl;
-		std::cout << "mov\tedx, " << this->right->identifier << std::endl;
-		std::cout << "add\teax, edx" << std::endl;
+		cout << "MathExpr: " << this->left->identifier << " " << this->op << " " << this->right->identifier << endl;
+	}
+}
+
+Result DeclareIfStatement::compile(compileContext& compile_context) const
+{
+	Result compileResult = Result("", "", false);
+	Result r = this->conditionalExpr->compile(compile_context);
+	compile_context.getTopTable()->removeSymbol(r.getResult());
+	compileResult.addResult(r);
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
+	compile_context.addTable(table);
+	compile_context.pushTable(table);
+	r = this->ifBlock->compile(compile_context);
+	compileResult.addResult(r);
+	printQuadruple();
+	if (this->elseBlock != nullptr)
+	{
+		SymbolTable* table = new SymbolTable(compile_context.getTopTable());
+		compile_context.addTable(table);
+		compile_context.pushTable(table);
+		r = this->elseBlock->compile(compile_context);
+		compileResult.addResult(r);
+	}
+	return compileResult;
+}
+void DeclareIfStatement::printQuadruple() const
+{
+	cout << "If" << endl;
+	this->conditionalExpr->printQuadruple();
+	cout << "Goto" << endl;
+	this->ifBlock->printQuadruple();
+	if (this->elseBlock != nullptr)
+	{
+		cout << "Else" << endl;
+		this->elseBlock->printQuadruple();
 	}
 }

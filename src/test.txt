@@ -1,4 +1,9 @@
 int a;
-int c;
-int s;
-int b = a+c+s+5;
+if (a + 0)
+{
+    int asd = 4;
+}
+else
+{
+    int asd2 = 12;
+}

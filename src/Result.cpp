@@ -27,3 +27,13 @@ void Result::setResult(std::string result)
 {
     this->result = result;
 }
+
+// void Result::setStatement(Statement* statement)
+// {
+//     this->statement = statement;
+// }
+
+// Statement* Result::getStatement()
+// {
+//     return statement;
+// }

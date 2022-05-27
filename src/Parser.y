@@ -42,6 +42,7 @@ ProgramNode* programptr = nullptr;
 %type <programptr_val> program
 %type <statement_val> statement
 %type <declare_variableStatement_val> variable_declaration
+%type <declare_variableStatement_val> const_variable_declaration
 %type <stringValue> variable_type
 %type <parameter_val> parameter
 %type <parameter_list_val> parameter_list
@@ -49,7 +50,9 @@ ProgramNode* programptr = nullptr;
 %type <block_node_val> block
 %type <conditional_expr_statement_val> condtional_expr
 %type <math_expr_statement_val> math_expr
-%type <stringValue> CONST_VALUE
+%type <literal_val> CONST_VALUE
+%type <declare_ifStatement_val> if_statement
+
 
 
 %union{
@@ -66,6 +69,8 @@ ProgramNode* programptr = nullptr;
     BlockStatement* block_node_val;
     ConditionalExprStatement* conditional_expr_statement_val;
     MathExprStatement* math_expr_statement_val;
+    LiteralVal* literal_val;
+    DeclareIfStatement* declare_ifStatement_val;
 }
 
  /*Defining the grammar */
@@ -123,21 +128,22 @@ expr:
 variable_declaration:
 variable_type IDENTIFIER SEMICOLON     
 { 
-    $$ = new DeclareVariableStatement($1,$2, nullptr);
+    $$ = new DeclareVariableStatement($1,$2, nullptr, false);
 }
 | variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON
 {
-    $$ = new DeclareVariableStatement($1,$2, $4);
+    $$ = new DeclareVariableStatement($1,$2, $4, false);
 };
 
-CONST_VALUE: INT_VALUE {$$ = $1;}
-| FLOAT_VALUE 
-| STRING_VALUE 
-| CHAR_VALUE 
-| BOOL_VALUE_TRUE 
-| BOOL_VALUE_FALSE;
+CONST_VALUE: INT_VALUE  {$$ = new LiteralVal("int", $1);}
+| FLOAT_VALUE           {$$ = new LiteralVal("float", $1);}
+| STRING_VALUE          {$$ = new LiteralVal("string", $1);}
+| CHAR_VALUE            {$$ = new LiteralVal("char", $1);}
+| BOOL_VALUE_TRUE       {$$ = new LiteralVal("bool", $1);}
+| BOOL_VALUE_FALSE      {$$ = new LiteralVal("bool", $1);}
+; 
 
-const_variable_declaration: CONSTANT variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON;
+const_variable_declaration: CONSTANT variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON  {$$ = new DeclareVariableStatement($2,$3, $5, true);};
 
 variable_type: INT | FLOAT | STRING | CHAR | BOOL;
 
@@ -182,8 +188,15 @@ argument: condtional_expr
 
 /*If statment*/
 /*define an unambiguous if statement*/
-if_statement: IF LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE
-| IF LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE ELSE LEFT_BRACE program RIGHT_BRACE
+if_statement: 
+  IF LEFT_PAREN condtional_expr RIGHT_PAREN block   
+  {
+    $$ = new DeclareIfStatement($3,$5,nullptr);
+  }            
+| IF LEFT_PAREN condtional_expr RIGHT_PAREN block ELSE block
+  {
+      $$ = new DeclareIfStatement($3,$5,$7);
+  }
 | IF LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE elseif_expr;
 
 /*elseif statement*/
@@ -245,15 +258,15 @@ math_expr: math_expr OR math_expr
 | math_expr GREATER_THAN_EQUAL math_expr
 | math_expr LESS_THAN math_expr
 | math_expr LESS_THAN_EQUAL math_expr
-| math_expr PLUS math_expr                {$$ = new MathExprStatement($2,$1,$3,false,false,"");}
+| math_expr PLUS math_expr                {$$ = new MathExprStatement($2,$1,$3,nullptr,false,false,"");}
 | math_expr MINUS math_expr
 | math_expr TIMES math_expr
 | math_expr DIVIDE math_expr
 | math_expr MODULUS math_expr
 | math_expr EXPONENT math_expr
 | LEFT_PAREN math_expr RIGHT_PAREN
-| IDENTIFIER                                {$$=new MathExprStatement("",nullptr,nullptr,true,false,$1);printf("assigntment\n");}
-| CONST_VALUE                               {$$=new MathExprStatement("",nullptr,nullptr,false,true,$1);printf("assigntment with val\n");}
+| IDENTIFIER                                {$$=new MathExprStatement("",nullptr,nullptr,nullptr,true,false,$1);printf("assigntment\n");}
+| CONST_VALUE                               {$$=new MathExprStatement("",nullptr,nullptr,$1,false,true,"");printf("assigntment with val\n");}
 ;
 
 %%

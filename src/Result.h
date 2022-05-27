@@ -1,12 +1,12 @@
 #pragma once 
 #include <string>
-
 class Result
 {
 private:
     std::string result;
     std::string error;
     bool is_error;
+    //Statement* statement;
 public:
     Result(std::string r, std::string error,bool isError)
     {
@@ -19,5 +19,7 @@ public:
     void addResult(Result& r);
     void setError(std::string error);
     void setResult(std::string result);
+    // void setStatement(Statement* statement);
+    // Statement* getStatement();
 };
 

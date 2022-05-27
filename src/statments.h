@@ -76,12 +76,14 @@ class DeclareVariableStatement : public Statement
 	public:
 	string type;
 	string name;
+	bool is_const = false;
 	ConditionalExprStatement* assignment;
-	inline DeclareVariableStatement(string type, string name, ConditionalExprStatement* assignment)
+	inline DeclareVariableStatement(string type, string name, ConditionalExprStatement* assignment, bool is_const)
 	{
 		this->type = type;
 		this->name = name;
 		this->assignment = assignment;
+		this->is_const = is_const;
 	}
 	virtual Result compile(compileContext& compile_context) const override;
 	void printQuadruple() const override;
@@ -140,7 +142,9 @@ class MathExprStatement : public ConditionalExprStatement
 	string identifier;
 	bool is_identifier;
 	bool is_const_val;
-	inline MathExprStatement(string op, MathExprStatement* left, MathExprStatement* right, bool is_identifier, bool is_const_val,string identifier)
+	LiteralVal* literal_val;
+
+	inline MathExprStatement(string op, MathExprStatement* left, MathExprStatement* right, LiteralVal* literal_val, bool is_identifier, bool is_const_val, string identifier)
 	{
 		this->op = op;
 		this->left = left;
@@ -148,7 +152,7 @@ class MathExprStatement : public ConditionalExprStatement
 		this->is_identifier = is_identifier;
 		this->identifier = identifier;
 		this->is_const_val = is_const_val;
-		
+		this->literal_val = literal_val;
 	}
 	// inline string toString()
 	// {
@@ -159,4 +163,21 @@ class MathExprStatement : public ConditionalExprStatement
 	// }
 	void printQuadruple() const override;
 	virtual Result compile(compileContext& compile_context) const override;
+};
+
+class DeclareIfStatement : public ConditionalExprStatement
+{
+	public:
+	ConditionalExprStatement* conditionalExpr;
+	BlockStatement* ifBlock;
+	BlockStatement* elseBlock;
+
+	inline DeclareIfStatement(ConditionalExprStatement* conditionalExpr, BlockStatement* ifBlock, BlockStatement* elseBlock)
+	{
+		this->conditionalExpr = conditionalExpr;
+		this->ifBlock = ifBlock;
+		this->elseBlock = elseBlock;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
 };
