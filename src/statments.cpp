@@ -22,7 +22,7 @@ Result DeclareVariableStatement::compile(compileContext& compile_context) const
 		{
 			MathExprStatement* mathExpr = (MathExprStatement*)this->assignment;
 			symbol->value = result.getResult();
-			compile_context.getTopTable()->removeSymbol(result.getResult());
+			compile_context.getTopTable()->removeSymbol(symbol->value);
 			
 		}
 	}
@@ -161,6 +161,11 @@ Result MathExprStatement::compile(compileContext& compile_context) const
 		compileResult.setResult(this->identifier);
 		return compileResult;
 	}
+	else if (is_const_val)
+	{
+		compileResult.setResult(this->op+this->identifier);
+		return compileResult;
+	}
 	else 
 	{
 	string left =  this->left->compile(compile_context).getResult();
@@ -180,8 +185,16 @@ Result MathExprStatement::compile(compileContext& compile_context) const
 	}
 	if (rightOperand == nullptr)
 	{
-		compileResult.setError("Identifier " + this->right->identifier + " not found");
-		return compileResult;
+		if (this->right->is_const_val)
+		{
+			compileResult.setResult(leftOperand->name+this->op + this->right->identifier);
+			return compileResult;
+		}
+		else
+		{
+			compileResult.setError("Identifier " + this->right->identifier + " not found");
+			return compileResult;
+		}
 	}
 	variable* leftVar = static_cast<variable*>(leftOperand);
 	variable* rightVar = static_cast<variable*>(rightOperand);

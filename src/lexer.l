@@ -39,7 +39,7 @@ def {return DEF;}
 
 
  /*Constants*/
-[0-9]+  {yylval.integerValue = atoi(strdup(yytext)); return INT_VALUE;}
+[0-9]+  {yylval.stringValue = strdup(yytext); return INT_VALUE;}
 [0-9]+\.[0-9]+  { yylval.floatValue = atof(strdup(yytext)); return FLOAT_VALUE;}
 ["]([^\n\t\r\f\v\ ])*["]  {yylval.stringValue = strdup(yytext); return STRING_VALUE;}
 [']([^\n\t\r\f\v\ ])['] { yylval.charValue = yytext[1]; return CHAR_VALUE;}

@@ -139,14 +139,16 @@ class MathExprStatement : public ConditionalExprStatement
 	MathExprStatement* right;
 	string identifier;
 	bool is_identifier;
-
-	inline MathExprStatement(string op, MathExprStatement* left, MathExprStatement* right, bool is_identifier, string identifier)
+	bool is_const_val;
+	inline MathExprStatement(string op, MathExprStatement* left, MathExprStatement* right, bool is_identifier, bool is_const_val,string identifier)
 	{
 		this->op = op;
 		this->left = left;
 		this->right = right;
 		this->is_identifier = is_identifier;
 		this->identifier = identifier;
+		this->is_const_val = is_const_val;
+		
 	}
 	// inline string toString()
 	// {

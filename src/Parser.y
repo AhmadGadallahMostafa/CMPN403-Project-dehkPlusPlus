@@ -19,7 +19,7 @@ ProgramNode* programptr = nullptr;
 
 %token <stringValue>INT FLOAT STRING CHAR BOOL VOID
 %token FOR WHILE DO BREAK CONTINUE IF ELSE ELSEIF SWITCH CASE DEFAULT CONSTANT RETURN DEF
-%token INT_VALUE FLOAT_VALUE STRING_VALUE CHAR_VALUE BOOL_VALUE_TRUE BOOL_VALUE_FALSE COMMENT
+%token <stringValue>INT_VALUE FLOAT_VALUE STRING_VALUE CHAR_VALUE BOOL_VALUE_TRUE BOOL_VALUE_FALSE COMMENT
 %token <stringValue>IDENTIFIER
 %token ASSIGN <stringValue>PLUS MINUS TIMES DIVIDE MODULUS EXPONENT
 %token AND OR NOT
@@ -49,7 +49,7 @@ ProgramNode* programptr = nullptr;
 %type <block_node_val> block
 %type <conditional_expr_statement_val> condtional_expr
 %type <math_expr_statement_val> math_expr
-
+%type <stringValue> CONST_VALUE
 
 
 %union{
@@ -124,15 +124,18 @@ variable_declaration:
 variable_type IDENTIFIER SEMICOLON     
 { 
     $$ = new DeclareVariableStatement($1,$2, nullptr);
-    printf("Found var declaration \n");
 }
 | variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON
 {
     $$ = new DeclareVariableStatement($1,$2, $4);
-    printf("Found var declaration with assing\n");
 };
 
-CONST_VALUE: INT_VALUE | FLOAT_VALUE | STRING_VALUE | CHAR_VALUE | BOOL_VALUE_TRUE | BOOL_VALUE_FALSE;
+CONST_VALUE: INT_VALUE {$$ = $1;}
+| FLOAT_VALUE 
+| STRING_VALUE 
+| CHAR_VALUE 
+| BOOL_VALUE_TRUE 
+| BOOL_VALUE_FALSE;
 
 const_variable_declaration: CONSTANT variable_type IDENTIFIER ASSIGN condtional_expr SEMICOLON;
 
@@ -242,15 +245,15 @@ math_expr: math_expr OR math_expr
 | math_expr GREATER_THAN_EQUAL math_expr
 | math_expr LESS_THAN math_expr
 | math_expr LESS_THAN_EQUAL math_expr
-| math_expr PLUS math_expr                {$$ = new MathExprStatement($2,$1,$3,false,"");}
+| math_expr PLUS math_expr                {$$ = new MathExprStatement($2,$1,$3,false,false,"");}
 | math_expr MINUS math_expr
 | math_expr TIMES math_expr
 | math_expr DIVIDE math_expr
 | math_expr MODULUS math_expr
 | math_expr EXPONENT math_expr
 | LEFT_PAREN math_expr RIGHT_PAREN
-| IDENTIFIER                                {$$=new MathExprStatement("",nullptr,nullptr,true,$1);printf("assigntment\n");}
-| CONST_VALUE
+| IDENTIFIER                                {$$=new MathExprStatement("",nullptr,nullptr,true,false,$1);printf("assigntment\n");}
+| CONST_VALUE                               {$$=new MathExprStatement("",nullptr,nullptr,false,true,$1);printf("assigntment with val\n");}
 ;
 
 %%

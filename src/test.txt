@@ -1,4 +1,4 @@
 int a;
-int b;
+int c;
 int s;
-int c = a+b+s;
+int b = a+c+s+5;
