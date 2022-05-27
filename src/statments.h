@@ -165,18 +165,21 @@ class MathExprStatement : public ConditionalExprStatement
 	virtual Result compile(compileContext& compile_context) const override;
 };
 
+
 class DeclareIfStatement : public ConditionalExprStatement
 {
 	public:
 	ConditionalExprStatement* conditionalExpr;
 	BlockStatement* ifBlock;
 	BlockStatement* elseBlock;
+	DeclareIfStatement* elIf;
 
-	inline DeclareIfStatement(ConditionalExprStatement* conditionalExpr, BlockStatement* ifBlock, BlockStatement* elseBlock)
+	inline DeclareIfStatement(ConditionalExprStatement* conditionalExpr, BlockStatement* ifBlock, BlockStatement* elseBlock, DeclareIfStatement* elIf)
 	{
 		this->conditionalExpr = conditionalExpr;
 		this->ifBlock = ifBlock;
 		this->elseBlock = elseBlock;
+		this->elIf = elIf;
 	}
 	virtual Result compile(compileContext& compile_context) const override;
 	void printQuadruple() const override;

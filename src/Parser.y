@@ -52,6 +52,7 @@ ProgramNode* programptr = nullptr;
 %type <math_expr_statement_val> math_expr
 %type <literal_val> CONST_VALUE
 %type <declare_ifStatement_val> if_statement
+%type <declare_ifStatement_val> elseif_expr
 
 
 
@@ -191,18 +192,32 @@ argument: condtional_expr
 if_statement: 
   IF LEFT_PAREN condtional_expr RIGHT_PAREN block   
   {
-    $$ = new DeclareIfStatement($3,$5,nullptr);
+    $$ = new DeclareIfStatement($3,$5,nullptr,nullptr);
   }            
 | IF LEFT_PAREN condtional_expr RIGHT_PAREN block ELSE block
   {
-      $$ = new DeclareIfStatement($3,$5,$7);
+      $$ = new DeclareIfStatement($3,$5,$7,nullptr);
   }
-| IF LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE elseif_expr;
+| IF LEFT_PAREN condtional_expr RIGHT_PAREN block elseif_expr
+  {
+      $$ = new DeclareIfStatement($3,$5,nullptr,$6);
+  }
+;
 
 /*elseif statement*/
-elseif_expr: ELSEIF LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE
-| ELSEIF LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE ELSE LEFT_BRACE program RIGHT_BRACE
-| ELSEIF LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE elseif_expr;
+elseif_expr: 
+  ELSEIF LEFT_PAREN condtional_expr RIGHT_PAREN block
+  {
+    $$ = new DeclareIfStatement($3,$5,nullptr,nullptr);
+  }
+| ELSEIF LEFT_PAREN condtional_expr RIGHT_PAREN block ELSE block
+  {
+      $$ = new DeclareIfStatement($3,$5,$7,nullptr);
+  }
+| ELSEIF LEFT_PAREN condtional_expr RIGHT_PAREN block elseif_expr
+  {
+      $$ = new DeclareIfStatement($3,$5,nullptr,$6);
+  }
 
 /*While statement*/
 while_statement: WHILE LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE;

@@ -3,6 +3,10 @@ if (a + 0)
 {
     int asd = 4;
 }
+elseif(a+1)
+{
+    int asd1=5;
+}
 else
 {
     int asd2 = 12;

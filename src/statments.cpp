@@ -278,6 +278,11 @@ Result DeclareIfStatement::compile(compileContext& compile_context) const
 	r = this->ifBlock->compile(compile_context);
 	compileResult.addResult(r);
 	printQuadruple();
+	if (this->elIf != nullptr)
+	{
+		r = this->elIf->compile(compile_context);
+		compileResult.addResult(r);
+	}
 	if (this->elseBlock != nullptr)
 	{
 		SymbolTable* table = new SymbolTable(compile_context.getTopTable());
