@@ -2,53 +2,48 @@
 
 Result DeclareVariableStatement::compile(compileContext& compile_context) const
 {
+	//create varaible
 	variable* var = new variable();
 	var->name = this->name;
 	var->symbolType = "variable";
 	var->type = this->type;
 	var->isConst = this->is_const;
-	Result result = Result("","",false);
+	//prepare return result
 	Result compileVarResult = Result("","",false);
+	// if var was declared with assignment
+	// then compile the assignment
 	if (this->assignment != nullptr)
 	{
 		var->isInitialized = true;
 		Result compileAssignmentResult = this->assignment->compile(compile_context);
-		result.addResult(compileAssignmentResult);
-		if (result.isError())
+		compileVarResult.addResult(compileAssignmentResult);
+		//if compiling math expr had any errors then return error 
+		if (compileVarResult.isError())
 		{
-			return result;
+			return compileVarResult;
 		}
 		else
 		{
+			//if compiling math expr had no errors then check type of mathexpr before assigning
 			MathExprStatement* mathExpr = (MathExprStatement*)this->assignment;
-			if(mathExpr->is_const_val)
+			if (mathExpr->mathExpression->type != var->type)
 			{
-				if(mathExpr->literal_val->type != var->type)
-				{
-					result.setError("Type mismatch");
-					return result;
-				}
+				compileVarResult.setError("Type of variable and assignment does not match");
+				return compileVarResult;
 			}
 			else
 			{
-				auto symbol = compile_context.getTopTable()->getSymbol(result.getResult());
-				variable* v = static_cast<variable*>(symbol);
-				if (v->type != var->type)
-				{
-					compile_context.getTopTable()->removeSymbol(v->name);
-					result.setError("Type mismatch");
-					return result;
-				}
+				//if type of mathexpr and type of variable match then assign value
+				var->value = mathExpr->mathExpression->getMathExpressionValue();
+				var->valueExpression = mathExpr->mathExpression;
 			}
-			var->value = result.getResult();
-			compile_context.getTopTable()->removeSymbol(var->value);
+
 		}
 	}
 	else
 	{
 		var->isInitialized = false;
 	}
-	compileVarResult.addResult(result);
 	Result declareVarResult = compile_context.getTopTable()->addSymbol(var);
 	compileVarResult.addResult(declareVarResult);
 	return compileVarResult;
@@ -167,99 +162,36 @@ void BlockStatement::printQuadruple() const
 
 Result MathExprStatement::compile(compileContext& compile_context) const
 {
-	Result compileResult = Result("", "", false);
-	if (is_identifier)
+	Result result = Result("","",false);
+	for (auto operand : this->mathExpression->operands)
 	{
-		symbol* s = compile_context.getTopTable()->getSymbol(this->identifier);
-		if (s == nullptr)
+		variable* v = dynamic_cast<variable*>(operand);
+		if (v != nullptr)
 		{
-			compileResult.setError("Identifier " + this->identifier + " not found");
-			return compileResult;
-		}
-		compileResult.setResult(this->identifier);
-		return compileResult;
-	}
-	else if (is_const_val)
-	{
-		compileResult.setResult(this->op+this->literal_val->value);
-		return compileResult;
-	}
-	else 
-	{
-	string left =  this->left->compile(compile_context).getResult();
-	//regex for checking if the left is a variable
-	string left_regex= ("^[a-zA-Z_][a-zA-Z0-9_]*$");
-	symbol* leftOperand = compile_context.getTopTable()->getSymbol(left); 
-	//after getting temp leftOperand remove it form table
-	if(!regex_match(left, regex(left_regex)))
-	{
-		compile_context.getTopTable()->removeSymbol(left);
-	}
-	symbol* rightOperand = compile_context.getTopTable()->getSymbol(this->right->identifier);
-	if (leftOperand == nullptr)
-	{
-		compileResult.setError("Identifier " + this->left->identifier + " not found");
-		return compileResult;
-	}
-	if (rightOperand == nullptr)
-	{
-		if (this->right->is_const_val)	
-		{
-			variable* v = static_cast<variable*>(leftOperand);
-			if (v->type != this->right->literal_val->type)
+			symbol* varFromTable = compile_context.getTopTable()->getSymbol(v->name);
+			if (varFromTable == nullptr)
 			{
-				compileResult.setError("Type mismatch");
-				return compileResult;
+				result.setError("Variable"+v->name+" not declared");
+				return result;
 			}
-			compileResult.setResult(leftOperand->name+this->op + this->right->literal_val->value);
-			variable* temp = new variable();
-			temp->name = leftOperand->name + this->op + this->right->literal_val->value;
-			temp->symbolType = "variable";
-			temp->type = v->type;
-			temp->isConst = false;
-			Result result = compile_context.getTopTable()->addSymbol(temp);
-			return compileResult;
-		}
-		else
-		{
-			compileResult.setError("Identifier " + this->right->identifier + " not found");
-			return compileResult;
+			else
+			{
+				v = static_cast<variable*>(varFromTable);
+				mathExpression->type = v->type;
+			}
 		}
 	}
-	variable* leftVar = static_cast<variable*>(leftOperand);
-	variable* rightVar = static_cast<variable*>(rightOperand);
-	if (leftVar->type != rightVar->type)
-	{
-		compileResult.setError("Type mismatch");
-		return compileResult;
-	}
-	variable* temp = new variable();
-	temp->name = leftOperand->name + this->op + rightOperand->name;
-	temp->symbolType = "variable";
-	temp->type = leftVar->type;
-	temp->isConst = false;
-	Result result = compile_context.getTopTable()->addSymbol(temp);
-	result.setResult(leftOperand->name + this->op + rightOperand->name);
-	compileResult.addResult(result);
-	this->printQuadruple();
-	return compileResult;
-	}
+	return result;
+}
+Result MathExprStatement::appendExpression(MathExprStatement* mathExpression, operatorSymbol* op)
+{
+	Result result = this->mathExpression->appendMathExpr(mathExpression->mathExpression, op);
+	return result;
 }
 
 void MathExprStatement::printQuadruple() const
 {
-	if (is_identifier)
-	{
-		cout << "Identifier: " << this->identifier << endl;
-	}
-	else if (is_const_val)
-	{
-		cout << "Literal: " << this->literal_val->value << endl;
-	}
-	else
-	{
-		cout << "MathExpr: " << this->left->identifier << " " << this->op << " " << this->right->identifier << endl;
-	}
+	return;
 }
 
 Result DeclareIfStatement::compile(compileContext& compile_context) const

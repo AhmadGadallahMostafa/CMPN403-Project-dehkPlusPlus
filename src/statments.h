@@ -90,6 +90,21 @@ class DeclareVariableStatement : public Statement
 
 };
 
+
+class AssignValueStatement : public Statement
+{
+	public:
+	string name;
+	ConditionalExprStatement* assignment;
+	inline AssignValueStatement(string name, ConditionalExprStatement* assignment)
+	{
+		this->name = name;
+		this->assignment = assignment;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};
+
 class ParameterList
 {
 public:
@@ -136,31 +151,15 @@ class ConditionalExprStatement : public Statement
 class MathExprStatement : public ConditionalExprStatement
 {
 	public:
-	string op;
-	MathExprStatement* left;
-	MathExprStatement* right;
-	string identifier;
-	bool is_identifier;
-	bool is_const_val;
-	LiteralVal* literal_val;
+	operatorSymbol* op;
+	MathExpression* mathExpression;
 
-	inline MathExprStatement(string op, MathExprStatement* left, MathExprStatement* right, LiteralVal* literal_val, bool is_identifier, bool is_const_val, string identifier)
+	inline MathExprStatement(operatorSymbol* op,MathExpression* mathExpression)
 	{
 		this->op = op;
-		this->left = left;
-		this->right = right;
-		this->is_identifier = is_identifier;
-		this->identifier = identifier;
-		this->is_const_val = is_const_val;
-		this->literal_val = literal_val;
+		this->mathExpression = mathExpression;
 	}
-	// inline string toString()
-	// {
-	// 	if(is_identifier)
-	// 		return left;
-	// 	else
-	// 		return left + " " + op + " " + right;
-	// }
+	Result appendExpression(MathExprStatement* mathExpression, operatorSymbol* op);
 	void printQuadruple() const override;
 	virtual Result compile(compileContext& compile_context) const override;
 };

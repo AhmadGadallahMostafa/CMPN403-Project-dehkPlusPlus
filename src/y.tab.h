@@ -182,11 +182,13 @@ typedef union YYSTYPE
     MathExprStatement* math_expr_statement_val;
     LiteralVal* literal_val;
     DeclareIfStatement* declare_ifStatement_val;
+    MathExpression* math_expr_val;
+    operatorSymbol* operator_val;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 190 "y.tab.h"
+#line 192 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

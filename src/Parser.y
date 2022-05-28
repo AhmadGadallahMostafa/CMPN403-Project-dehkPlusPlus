@@ -72,6 +72,8 @@ ProgramNode* programptr = nullptr;
     MathExprStatement* math_expr_statement_val;
     LiteralVal* literal_val;
     DeclareIfStatement* declare_ifStatement_val;
+    MathExpression* math_expr_val;
+    operatorSymbol* operator_val;
 }
 
  /*Defining the grammar */
@@ -155,7 +157,6 @@ function_declaration:
   DEF variable_type IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN block
   {
     $$ = new DeclareFunctionStatement($2,$3,$5,$7);
-    printf("Found function declaration \n");
   }
 | DEF VOID IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN block SEMICOLON;
 
@@ -169,8 +170,7 @@ parameter_list:
 | ;
 
 parameter: 
-  variable_type IDENTIFIER                              {$$ = new parameter($1,$2);
-  printf("Found parameter\n");}
+  variable_type IDENTIFIER                              {$$ = new parameter($1,$2);}
 | variable_type IDENTIFIER ASSIGN condtional_expr;
 
 /*Function call*/
@@ -273,15 +273,28 @@ math_expr: math_expr OR math_expr
 | math_expr GREATER_THAN_EQUAL math_expr
 | math_expr LESS_THAN math_expr
 | math_expr LESS_THAN_EQUAL math_expr
-| math_expr PLUS math_expr                {$$ = new MathExprStatement($2,$1,$3,nullptr,false,false,"");}
+| math_expr PLUS math_expr                
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr MINUS math_expr
 | math_expr TIMES math_expr
 | math_expr DIVIDE math_expr
 | math_expr MODULUS math_expr
 | math_expr EXPONENT math_expr
 | LEFT_PAREN math_expr RIGHT_PAREN
-| IDENTIFIER                                {$$=new MathExprStatement("",nullptr,nullptr,nullptr,true,false,$1);printf("assigntment\n");}
-| CONST_VALUE                               {$$=new MathExprStatement("",nullptr,nullptr,$1,false,true,"");printf("assigntment with val\n");}
+| IDENTIFIER                                
+{
+  MathExpression* expr = new MathExpression($1);
+  $$ = new MathExprStatement(nullptr,expr);
+
+}
+| CONST_VALUE                               
+{
+  MathExpression* expr = new MathExpression($1);
+  $$ = new MathExprStatement(nullptr,expr);
+}
 ;
 
 %%
