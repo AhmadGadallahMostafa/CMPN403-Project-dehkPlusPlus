@@ -66,8 +66,8 @@ void SymbolTable::print()
         }
         else if (it->second->symbolType == "parameter")
         {
-            parameter* p = (parameter*)it->second;
-            cout << "parameter " << it->first << " " << p->type << endl;
+            variable* p = static_cast<variable*>(it->second);
+            cout << "parameter " << it->first << " " << p->type <<" "<<p->value<< endl;
         }
         //cout << it->first << " " << it->second->symbolType << " " << it->second->line << " " << it->second->column << endl;
     }

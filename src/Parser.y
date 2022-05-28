@@ -163,7 +163,12 @@ function_declaration:
   {
     $$ = new DeclareFunctionStatement($2,$3,$5,$7);
   }
-| DEF VOID IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN block SEMICOLON;
+| DEF VOID IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN block 
+{
+  printf("voidfunction\n");
+    $$ = new DeclareFunctionStatement("void",$3,$5,$7);
+}
+;
 
 parameter_list: 
   parameter_list COMMA parameter 
@@ -175,8 +180,9 @@ parameter_list:
 | ;
 
 parameter: 
-  variable_type IDENTIFIER                              {$$ = new parameter($1,$2);}
-| variable_type IDENTIFIER ASSIGN condtional_expr;
+  variable_type IDENTIFIER                              {$$ = new parameter($1,$2,nullptr);}
+| variable_type IDENTIFIER ASSIGN condtional_expr       {$$ = new parameter($1,$2,$4);}
+;
 
 /*Function call*/
 function_call: IDENTIFIER LEFT_PAREN args_list RIGHT_PAREN SEMICOLON;

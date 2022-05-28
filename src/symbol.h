@@ -6,6 +6,7 @@
 #include "Result.h"
 using namespace std;
 struct MathExpression;
+class ConditionalExprStatement;
 struct symbol
 {
     string name;
@@ -46,15 +47,16 @@ struct LiteralVal : public symbol
     }
 };
 
-
 struct parameter : public symbol
 {
     string type;
-    parameter(string type, string name):symbol()
+    ConditionalExprStatement* conditionalExpr;
+    parameter(string type, string name, ConditionalExprStatement* conditional)
     {
-        symbolType = "parameter";
         this->type = type;
         this->name = name;
+        this->symbolType = "parameter";
+        this->conditionalExpr = conditional;
     }
     virtual void print() override
     {

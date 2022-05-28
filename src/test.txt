@@ -1,6 +1,4 @@
-int a;
-int s;
-int b;
-int c = a+b;
-a = b+c;
-b = 5;
+def void fin1(int x = 5) 
+{
+  int as;
+}

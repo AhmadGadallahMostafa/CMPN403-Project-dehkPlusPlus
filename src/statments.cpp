@@ -26,7 +26,7 @@ Result DeclareVariableStatement::compile(compileContext& compile_context) const
 		MathExprStatement* mathExpr = (MathExprStatement*)this->assignment;
 		if (mathExpr->mathExpression->type != var->type)
 		{
-			compileVarResult.setError("Type of variable and assignment does not match");
+			compileVarResult.setError("Type of variable "+var->name +" is not equal to type of the expression");
 			return compileVarResult;
 		}
 		//if type of mathexpr and type of variable match then assign value
@@ -117,9 +117,31 @@ Result DeclareFunctionStatement::compile(compileContext& compile_context) const
 	{
 		variable* symbol = new variable();
 		symbol->name = param->name;
-		symbol->symbolType = "variable";
 		symbol->type = param->type;
 		symbol->isConst = false;
+		symbol->symbolType = param->symbolType;
+		if (param->conditionalExpr != nullptr)
+		{
+			symbol->isInitialized = true;
+			Result compileConditionalExprResult = param->conditionalExpr->compile(compile_context);
+			compileResult.addResult(compileConditionalExprResult);
+			if (compileResult.isError())
+			{
+				return compileResult;
+			}
+			MathExprStatement* mathExpr = (MathExprStatement*)param->conditionalExpr;
+			if (mathExpr->mathExpression->type != symbol->type)
+			{
+				compileResult.setError("Type of variable "+param->name +" is not equal to type of the expression");
+				return compileResult;
+			}
+			symbol->value = mathExpr->mathExpression->getMathExpressionValue();
+			symbol->valueExpression = mathExpr->mathExpression;
+		}
+		else
+		{
+			symbol->isInitialized = false;
+		}
 		Result result = compile_context.getTopTable()->addSymbol(symbol);
 		compileResult.addResult(result);
 		//if compile result is error, return it
