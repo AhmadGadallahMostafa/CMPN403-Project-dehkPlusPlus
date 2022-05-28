@@ -28,6 +28,13 @@ void Result::setResult(std::string result)
     this->result = result;
 }
 
+void Result::printError()
+{
+    if (is_error)
+    {
+        std::cout << error << std::endl;
+    }
+}
 // void Result::setStatement(Statement* statement)
 // {
 //     this->statement = statement;

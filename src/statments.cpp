@@ -22,23 +22,19 @@ Result DeclareVariableStatement::compile(compileContext& compile_context) const
 		{
 			return compileVarResult;
 		}
-		else
+		//if compiling math expr had no errors then check type of mathexpr before assigning
+		MathExprStatement* mathExpr = (MathExprStatement*)this->assignment;
+		if (mathExpr->mathExpression->type != var->type)
 		{
-			//if compiling math expr had no errors then check type of mathexpr before assigning
-			MathExprStatement* mathExpr = (MathExprStatement*)this->assignment;
-			if (mathExpr->mathExpression->type != var->type)
-			{
-				compileVarResult.setError("Type of variable and assignment does not match");
-				return compileVarResult;
-			}
-			else
-			{
-				//if type of mathexpr and type of variable match then assign value
-				var->value = mathExpr->mathExpression->getMathExpressionValue();
-				var->valueExpression = mathExpr->mathExpression;
-			}
-
+			compileVarResult.setError("Type of variable and assignment does not match");
+			return compileVarResult;
 		}
+		//if type of mathexpr and type of variable match then assign value
+		var->value = mathExpr->mathExpression->getMathExpressionValue();
+		var->valueExpression = mathExpr->mathExpression;
+
+
+		
 	}
 	else
 	{
@@ -236,4 +232,37 @@ void DeclareIfStatement::printQuadruple() const
 		cout << "Else" << endl;
 		this->elseBlock->printQuadruple();
 	}
+}
+
+Result DeclareAssignStatement::compile(compileContext& compile_context) const
+{
+	Result compileResult = Result("", "", false);
+	symbol* var = compile_context.getTopTable()->getSymbol(this->identifier);
+	if (var == nullptr)
+	{
+		compileResult.setError("Variable " + this->identifier + " not declared");
+		return compileResult;
+	}
+	variable* v = static_cast<variable*>(var);
+	Result r = this->conditionalExpr->compile(compile_context);
+	compileResult.addResult(r);
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	MathExprStatement* mathExpr = (MathExprStatement*)this->conditionalExpr;
+	if (mathExpr->mathExpression->type != v->type)
+	{
+		compileResult.setError("Type mismatch");
+		return compileResult;
+	}
+	v->value = mathExpr->mathExpression->getMathExpressionValue();
+	v->valueExpression = mathExpr->mathExpression;
+	return compileResult;	
+}
+
+void DeclareAssignStatement::printQuadruple() const
+{
+	cout << "Assign: " << this->identifier << endl;
+	this->conditionalExpr->printQuadruple();
 }

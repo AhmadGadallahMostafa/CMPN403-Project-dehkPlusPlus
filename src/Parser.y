@@ -53,7 +53,7 @@ ProgramNode* programptr = nullptr;
 %type <literal_val> CONST_VALUE
 %type <declare_ifStatement_val> if_statement
 %type <declare_ifStatement_val> elseif_expr
-
+%type <declare_assignStatement_val> variable_assignment
 
 
 %union{
@@ -74,6 +74,7 @@ ProgramNode* programptr = nullptr;
     DeclareIfStatement* declare_ifStatement_val;
     MathExpression* math_expr_val;
     operatorSymbol* operator_val;
+    DeclareAssignStatement* declare_assignStatement_val;
 }
 
  /*Defining the grammar */
@@ -150,8 +151,12 @@ const_variable_declaration: CONSTANT variable_type IDENTIFIER ASSIGN condtional_
 
 variable_type: INT | FLOAT | STRING | CHAR | BOOL;
 
-variable_assignment: IDENTIFIER ASSIGN condtional_expr SEMICOLON;
-
+variable_assignment: 
+IDENTIFIER ASSIGN condtional_expr SEMICOLON
+{
+    $$ = new DeclareAssignStatement($1, $3);
+}
+;
  /*Function declarations */
 function_declaration:
   DEF variable_type IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN block

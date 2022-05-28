@@ -183,3 +183,17 @@ class DeclareIfStatement : public ConditionalExprStatement
 	virtual Result compile(compileContext& compile_context) const override;
 	void printQuadruple() const override;
 };
+
+class DeclareAssignStatement : public ConditionalExprStatement
+{
+	public:
+	string identifier;
+	ConditionalExprStatement* conditionalExpr;
+	inline DeclareAssignStatement(string identifier, ConditionalExprStatement* conditionalExpr)
+	{
+		this->identifier = identifier;
+		this->conditionalExpr = conditionalExpr;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};

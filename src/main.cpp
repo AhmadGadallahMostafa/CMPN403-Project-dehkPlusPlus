@@ -18,8 +18,8 @@ int main()
     {
         cout << "Parsing successful" << endl;
         cout << "Compiling..." << endl;
-        programptr->compile(compile_context);
-        
+        programptr->compile(compile_context).printError();
+
         int i = 0;
         for (auto t: compile_context.tables)
         {

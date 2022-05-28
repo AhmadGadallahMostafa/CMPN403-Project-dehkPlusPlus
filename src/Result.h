@@ -1,5 +1,6 @@
 #pragma once 
 #include <string>
+#include<iostream>
 class Result
 {
 private:
@@ -19,6 +20,7 @@ public:
     void addResult(Result& r);
     void setError(std::string error);
     void setResult(std::string result);
+    void printError();
     // void setStatement(Statement* statement);
     // Statement* getStatement();
 };
