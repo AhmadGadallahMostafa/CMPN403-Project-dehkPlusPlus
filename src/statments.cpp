@@ -253,7 +253,7 @@ Result DeclareAssignStatement::compile(compileContext& compile_context) const
 	MathExprStatement* mathExpr = (MathExprStatement*)this->conditionalExpr;
 	if (mathExpr->mathExpression->type != v->type)
 	{
-		compileResult.setError("Type mismatch");
+		compileResult.setError("Type mismatch "+v->name+ " is of type "+v->type+" and value assigned is of type "+mathExpr->mathExpression->type);
 		return compileResult;
 	}
 	v->value = mathExpr->mathExpression->getMathExpressionValue();
