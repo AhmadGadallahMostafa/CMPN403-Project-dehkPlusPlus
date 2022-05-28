@@ -54,6 +54,8 @@ ProgramNode* programptr = nullptr;
 %type <declare_ifStatement_val> if_statement
 %type <declare_ifStatement_val> elseif_expr
 %type <declare_assignStatement_val> variable_assignment
+%type <declare_whileStatement_val> while_statement
+%type <declare_doWhileStatement_val> do_statement
 
 
 %union{
@@ -75,6 +77,8 @@ ProgramNode* programptr = nullptr;
     MathExpression* math_expr_val;
     operatorSymbol* operator_val;
     DeclareAssignStatement* declare_assignStatement_val;
+    DeclareWhileStatement* declare_whileStatement_val;
+    DeclareDoWhileStatement* declare_doWhileStatement_val;
 }
 
  /*Defining the grammar */
@@ -165,7 +169,6 @@ function_declaration:
   }
 | DEF VOID IDENTIFIER LEFT_PAREN parameter_list RIGHT_PAREN block 
 {
-  printf("voidfunction\n");
     $$ = new DeclareFunctionStatement("void",$3,$5,$7);
 }
 ;
@@ -231,9 +234,15 @@ elseif_expr:
   }
 
 /*While statement*/
-while_statement: WHILE LEFT_PAREN condtional_expr RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE;
+while_statement: WHILE LEFT_PAREN condtional_expr RIGHT_PAREN block
+  {
+    $$ = new DeclareWhileStatement($3,$5);
+  };
+do_statement: DO block WHILE LEFT_PAREN condtional_expr RIGHT_PAREN SEMICOLON
+{
+    $$ = new DeclareDoWhileStatement($5,$2);
+};
 
-do_statement: DO LEFT_BRACE program RIGHT_BRACE WHILE LEFT_PAREN condtional_expr RIGHT_PAREN SEMICOLON;
 
 condtional_expr: 
   math_expr               {$$ = $1;}

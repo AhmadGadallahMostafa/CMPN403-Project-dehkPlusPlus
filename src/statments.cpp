@@ -288,3 +288,55 @@ void DeclareAssignStatement::printQuadruple() const
 	cout << "Assign: " << this->identifier << endl;
 	this->conditionalExpr->printQuadruple();
 }
+
+Result DeclareWhileStatement::compile(compileContext& compile_context)const
+{
+	Result compileResult = Result("", "", false);
+	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
+	compile_context.addTable(table);
+	compile_context.pushTable(table);
+	Result r = this->conditionalExpr->compile(compile_context);
+	compileResult.addResult(r);
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	r = this->block->compile(compile_context);
+	compileResult.addResult(r);
+	printQuadruple();
+	return compileResult;
+}
+
+void DeclareWhileStatement::printQuadruple() const
+{
+	cout << "While" << endl;
+	this->conditionalExpr->printQuadruple();
+	cout << "Goto" << endl;
+	this->block->printQuadruple();
+}
+
+Result DeclareDoWhileStatement::compile(compileContext& compile_context) const
+{
+	Result compileResult = Result("", "", false);
+	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
+	compile_context.addTable(table);
+	compile_context.pushTable(table);
+	Result r = this->block->compile(compile_context);
+	compileResult.addResult(r);
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	r = this->conditionalExpr->compile(compile_context);
+	compileResult.addResult(r);
+	printQuadruple();
+	return compileResult;
+}
+
+void DeclareDoWhileStatement::printQuadruple() const
+{
+	cout << "Do" << endl;
+	this->block->printQuadruple();
+	cout << "While" << endl;
+	this->conditionalExpr->printQuadruple();
+}

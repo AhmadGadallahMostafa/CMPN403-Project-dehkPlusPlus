@@ -1,4 +1,6 @@
-def void fin1(int x = 5) 
+int a;
+do 
 {
-  int as;
-}
+  int s;
+}while(a+10);
+

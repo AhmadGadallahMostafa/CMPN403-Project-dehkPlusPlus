@@ -164,7 +164,6 @@ class MathExprStatement : public ConditionalExprStatement
 	virtual Result compile(compileContext& compile_context) const override;
 };
 
-
 class DeclareIfStatement : public ConditionalExprStatement
 {
 	public:
@@ -193,6 +192,34 @@ class DeclareAssignStatement : public ConditionalExprStatement
 	{
 		this->identifier = identifier;
 		this->conditionalExpr = conditionalExpr;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};
+
+class DeclareWhileStatement : public ConditionalExprStatement
+{
+	public:
+	ConditionalExprStatement* conditionalExpr;
+	BlockStatement* block;
+	inline DeclareWhileStatement(ConditionalExprStatement* conditionalExpr, BlockStatement* block)
+	{
+		this->conditionalExpr = conditionalExpr;
+		this->block = block;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};
+
+class DeclareDoWhileStatement : public ConditionalExprStatement
+{
+	public:
+	ConditionalExprStatement* conditionalExpr;
+	BlockStatement* block;
+	inline DeclareDoWhileStatement(ConditionalExprStatement* conditionalExpr, BlockStatement* block)
+	{
+		this->conditionalExpr = conditionalExpr;
+		this->block = block;
 	}
 	virtual Result compile(compileContext& compile_context) const override;
 	void printQuadruple() const override;
