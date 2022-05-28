@@ -159,6 +159,11 @@ struct MathExpression
         }
         return result;
     }
+    Result appendOperator(operatorSymbol* op)
+    {
+        ops.push_back(op);
+        return Result("", "", true);
+    }
     Result appendMathExpr(MathExpression* mathExpression, operatorSymbol* op)
     {
         // if (this->type != mathExpression->type)

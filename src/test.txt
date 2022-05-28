@@ -1,2 +1,2 @@
 int x;
-int b = x*1;
+int b = !x;

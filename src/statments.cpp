@@ -12,6 +12,10 @@ Result DeclareVariableStatement::compile(compileContext& compile_context) const
 	Result compileVarResult = Result("","",false);
 	// if var was declared with assignment
 	// then compile the assignment
+	if (this == nullptr)
+	{
+		return compileVarResult;
+	}
 	if (this->assignment != nullptr)
 	{
 		var->isInitialized = true;
@@ -200,6 +204,11 @@ Result MathExprStatement::compile(compileContext& compile_context) const
 }
 Result MathExprStatement::appendExpression(MathExprStatement* mathExpression, operatorSymbol* op)
 {
+	if (mathExpression == nullptr)
+	{
+		Result r = this->mathExpression->appendOperator(op);
+		return r;
+	}
 	Result result = this->mathExpression->appendMathExpr(mathExpression->mathExpression, op);
 	return result;
 }

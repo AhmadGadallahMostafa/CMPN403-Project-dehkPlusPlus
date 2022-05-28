@@ -62,7 +62,7 @@ false   {return BOOL_VALUE_FALSE;}
  /*Logical Operators*/
 "&&" {yylval.stringValue="&&";return AND;}
 "||" {yylval.stringValue="||";return OR;}
-"!"  {return NOT;}
+"!"  {yylval.stringValue="!";return NOT;}
 
  /*Relational Operators*/
 "==" {yylval.stringValue="==";return EQUAL;}

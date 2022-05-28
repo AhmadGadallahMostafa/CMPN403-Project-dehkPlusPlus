@@ -353,7 +353,7 @@ $1->appendExpression($3, op);$$ = $1;
 | NOT math_expr
 {
   operatorSymbol* op = new operatorSymbol($1);
-  $$->appendExpression($2, op);
+  $2->appendExpression(nullptr, op);$$ = $2;
 }
 | math_expr EQUAL math_expr
 {
