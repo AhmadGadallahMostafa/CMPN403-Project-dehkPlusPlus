@@ -267,3 +267,61 @@ class DeclareSwitchStatement : Statement
 	void printQuadruple() const override;
 
 };
+
+class ForInitExpression : public ConditionalExprStatement
+{
+	public:
+	string identifier="";
+	string type="";
+	ConditionalExprStatement* conditionalExpr;
+	inline ForInitExpression(string type, string identifier, ConditionalExprStatement* conditionalExpr)
+	{
+		this->identifier = identifier;
+		this->conditionalExpr = conditionalExpr;
+		this->type = type;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};
+
+class ForFinalExpression : public ConditionalExprStatement
+{
+	public:
+	ConditionalExprStatement* conditionalExpr;
+	string identifier="";
+	inline ForFinalExpression(ConditionalExprStatement* conditionalExpr, string identifier)
+	{
+		this->conditionalExpr = conditionalExpr;
+		this->identifier = identifier;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};
+
+class ForLoopDo 
+{
+	public:
+	vector<ForFinalExpression*> forFinalExpressions;
+	inline void appendForFinalExpression(ForFinalExpression* forFinalExpression)
+	{
+		forFinalExpressions.push_back(forFinalExpression);
+	}
+};
+
+class DeclareForStatement : Statement
+{
+	public:
+	ForInitExpression* forInitExpression;
+	ForLoopDo* forLoopDo;
+	ConditionalExprStatement* conditionalExpr;
+	BlockStatement* block;
+	inline DeclareForStatement(ForInitExpression* forInitExpression, ForLoopDo* forLoopDo, ConditionalExprStatement* conditionalExpr,BlockStatement* block)
+	{
+		this->forInitExpression = forInitExpression;
+		this->forLoopDo = forLoopDo;
+		this->block = block;
+		this->conditionalExpr = conditionalExpr;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};

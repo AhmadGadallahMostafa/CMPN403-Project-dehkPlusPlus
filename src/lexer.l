@@ -51,26 +51,26 @@ false   {return BOOL_VALUE_FALSE;}
 [a-zA-Z_][a-zA-Z0-9_]* {yylval.stringValue = strdup(yytext); return IDENTIFIER;}
 
  /*Math Operators*/
-\= {return ASSIGN;}
+\= {yylval.stringValue="=";return ASSIGN;}
 \+ {yylval.stringValue="+";return PLUS;}
-\- {return MINUS;}
-\* {return TIMES;}
-\/ {return DIVIDE;}
-\% {return MODULUS;}
-\^ {return EXPONENT;}
+\- {yylval.stringValue="-";return MINUS;}
+\* {yylval.stringValue="*";return TIMES;}
+\/ {yylval.stringValue="/";return DIVIDE;}
+\% {yylval.stringValue="%";return MODULUS;}
+\^ {yylval.stringValue="^";return EXPONENT;}
 
  /*Logical Operators*/
-"&&" {return AND;}
-"||" {return OR;}
+"&&" {yylval.stringValue="&&";return AND;}
+"||" {yylval.stringValue="||";return OR;}
 "!"  {return NOT;}
 
  /*Relational Operators*/
-"==" {return EQUAL;}
-"!=" {return NOTEQUAL;}
-">"  {return GREATER_THAN;}
-"<"  {return LESS_THAN;}
-">=" {return GREATER_THAN_EQUAL;}
-"<=" {return LESS_THAN_EQUAL;}
+"==" {yylval.stringValue="==";return EQUAL;}
+"!=" {yylval.stringValue="!=";return NOTEQUAL;}
+">"  {yylval.stringValue=">";return GREATER_THAN;}
+"<"  {yylval.stringValue="<";return LESS_THAN;}
+">=" {yylval.stringValue=">=";return GREATER_THAN_EQUAL;}
+"<=" {yylval.stringValue="<=";return LESS_THAN_EQUAL;}
 
  /*Delimiters*/
 \( {return LEFT_PAREN;}

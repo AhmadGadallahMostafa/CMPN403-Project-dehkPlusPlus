@@ -21,9 +21,9 @@ ProgramNode* programptr = nullptr;
 %token FOR WHILE DO BREAK CONTINUE IF ELSE ELSEIF SWITCH CASE DEFAULT CONSTANT RETURN DEF
 %token <stringValue>INT_VALUE FLOAT_VALUE STRING_VALUE CHAR_VALUE BOOL_VALUE_TRUE BOOL_VALUE_FALSE COMMENT
 %token <stringValue>IDENTIFIER
-%token ASSIGN <stringValue>PLUS MINUS TIMES DIVIDE MODULUS EXPONENT
-%token AND OR NOT
-%token EQUAL NOTEQUAL GREATER_THAN GREATER_THAN_EQUAL LESS_THAN LESS_THAN_EQUAL
+%token <stringValue>ASSIGN PLUS MINUS TIMES DIVIDE MODULUS EXPONENT
+%token  <stringValue>AND OR NOT
+%token  <stringValue>EQUAL NOTEQUAL GREATER_THAN GREATER_THAN_EQUAL LESS_THAN LESS_THAN_EQUAL
 %token LEFT_PAREN RIGHT_PAREN LEFT_BRACE RIGHT_BRACE COMMA SEMICOLON COLON
 
  /*Defingin assciotaivety and precedence of operators */
@@ -60,6 +60,10 @@ ProgramNode* programptr = nullptr;
 %type <switch_case_list_val> switch_case_list
 %type <literal_val> switch_case_value
 %type <declare_switchStatement_val> switch_statement
+%type <for_init_expr_val> for_init_expr
+%type <for_final_expr_val> final_expr
+%type <for_loop_do_val>for_loop_do
+%type <declare_forStatement_val> for_statement
 
 %union{
     char *stringValue;
@@ -85,6 +89,10 @@ ProgramNode* programptr = nullptr;
     SwitchCase* switch_case_val;
     SwitchCaseList* switch_case_list_val;
     DeclareSwitchStatement* declare_switchStatement_val;
+    ForInitExpression* for_init_expr_val;
+    ForFinalExpression* for_final_expr_val;
+    ForLoopDo* for_loop_do_val;
+    DeclareForStatement* declare_forStatement_val;
 }
 
  /*Defining the grammar */
@@ -283,46 +291,136 @@ return_statement: RETURN SEMICOLON
 | RETURN condtional_expr SEMICOLON;
 
 /*For statement*/
-for_statement: FOR LEFT_PAREN for_init_expr SEMICOLON condtional_expr SEMICOLON for_loop_do RIGHT_PAREN LEFT_BRACE program RIGHT_BRACE;
-for_loop_do: final_expr COMMA final_expr
-| final_expr
+for_statement: FOR LEFT_PAREN for_init_expr SEMICOLON condtional_expr SEMICOLON for_loop_do RIGHT_PAREN block
+{
+  $$ = new DeclareForStatement($3,$7,$5,$9);
+};
 
-final_expr: condtional_expr 
+for_loop_do: 
+  final_expr COMMA final_expr
+  {
+    $$->appendForFinalExpression($1);
+    $$->appendForFinalExpression($3);
+  }
+| final_expr
+{
+  $$ = new ForLoopDo();
+  $$->appendForFinalExpression($1);
+};
+
+final_expr: 
+condtional_expr 
+{
+  $$ = new ForFinalExpression($1, "");
+}
 |IDENTIFIER ASSIGN condtional_expr
+{
+  $$ = new ForFinalExpression($3, $1);
+}
 |;
 
-for_init_expr: variable_type IDENTIFIER 
+for_init_expr: 
+  variable_type IDENTIFIER
+  {
+    $$ = new ForInitExpression($1, $2, nullptr);
+  }
 | variable_type IDENTIFIER ASSIGN condtional_expr
+  {
+    $$ = new ForInitExpression($1, $2, $4);
+  }
 | IDENTIFIER ASSIGN condtional_expr
+  {
+    $$ = new ForInitExpression(nullptr, $1, $3);
+  }
 | condtional_expr
+  {
+    $$ = new ForInitExpression(nullptr, nullptr, $1);
+  }
 | ;
 
 /*Math expression*/
-math_expr: math_expr OR math_expr
+math_expr: 
+  math_expr OR math_expr
+{
+operatorSymbol* op = new operatorSymbol($2);
+$1->appendExpression($3, op);$$ = $1;
+}
 | math_expr AND math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | NOT math_expr
+{
+  operatorSymbol* op = new operatorSymbol($1);
+  $$->appendExpression($2, op);
+}
 | math_expr EQUAL math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr NOTEQUAL math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr GREATER_THAN math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr GREATER_THAN_EQUAL math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr LESS_THAN math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr LESS_THAN_EQUAL math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr PLUS math_expr                
 {
   operatorSymbol* op = new operatorSymbol($2);
   $1->appendExpression($3, op);$$ = $1;
 }
 | math_expr MINUS math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr TIMES math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  printf("%s\n", $2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr DIVIDE math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr MODULUS math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | math_expr EXPONENT math_expr
+{
+  operatorSymbol* op = new operatorSymbol($2);
+  $1->appendExpression($3, op);$$ = $1;
+}
 | LEFT_PAREN math_expr RIGHT_PAREN
 | IDENTIFIER                                
 {
   MathExpression* expr = new MathExpression($1);
   $$ = new MathExprStatement(nullptr,expr);
-
 }
 | CONST_VALUE                               
 {

@@ -1,8 +1,2 @@
 int x;
-switch(x)
-{
-case '1':
-{int as4;}
-case 5:
-{int as5;}
-}
+int b = x*1;

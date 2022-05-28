@@ -156,16 +156,15 @@ struct MathExpression
                 result += operands[i]->name;
 
             }
-
         }
         return result;
     }
     Result appendMathExpr(MathExpression* mathExpression, operatorSymbol* op)
     {
-        if (this->type != mathExpression->type)
-        {
-            return Result("", "Type mismatch", false);
-        }
+        // if (this->type != mathExpression->type)
+        // {
+        //     return Result("", "Type mismatch", false);
+        // }
         this->operands.insert(this->operands.end(), mathExpression->operands.begin(), mathExpression->operands.end());
         this->ops.push_back(op);
         this->ops.insert(this->ops.end(), mathExpression->ops.begin(), mathExpression->ops.end());

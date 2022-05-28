@@ -32,9 +32,6 @@ Result DeclareVariableStatement::compile(compileContext& compile_context) const
 		//if type of mathexpr and type of variable match then assign value
 		var->value = mathExpr->mathExpression->getMathExpressionValue();
 		var->valueExpression = mathExpr->mathExpression;
-
-
-		
 	}
 	else
 	{
@@ -401,4 +398,202 @@ void DeclareSwitchStatement::printQuadruple() const
 	{
 		switchCase->printQuadruple();
 	}
+}
+
+Result ForInitExpression::compile(compileContext& compile_context) const
+{
+	Result compileResult = Result("", "", false);
+	//if expression was a variable declaration
+	if(type != "")
+	{
+		variable* v = new variable();
+		v->name = identifier;
+		v->type = type;
+		v->symbolType = "variable";
+		v->isConst = false;
+		if (conditionalExpr != nullptr)
+		{
+			Result r = conditionalExpr->compile(compile_context);
+			compileResult.addResult(r);
+			if (compileResult.isError())
+			{
+				return compileResult;
+			}
+			MathExprStatement* mathExpr = (MathExprStatement*)conditionalExpr;
+			if (mathExpr->mathExpression->type != v->type)
+			{
+				compileResult.setError("Type mismatch " + v->name + " is of type " + v->type + " and value assigned is of type " + mathExpr->mathExpression->type);
+				return compileResult;
+			}
+			v->value = mathExpr->mathExpression->getMathExpressionValue();
+			v->valueExpression = mathExpr->mathExpression;
+		}
+		Result addResult = compile_context.getTopTable()->addSymbol(v);
+		compileResult.addResult(addResult);
+		if (compileResult.isError())
+		{
+			return compileResult;
+		}
+	}	
+	else if(type == "" && identifier != "")
+	{
+		//variable was already declared before
+		symbol* s = compile_context.getTopTable()->getSymbol(identifier);
+		if (s == nullptr)
+		{
+			compileResult.setError("Variable " + identifier + " not declared");
+			return compileResult;
+		}
+		variable* v = static_cast<variable*>(s);
+		if(conditionalExpr != nullptr)
+		{
+			Result r = conditionalExpr->compile(compile_context);
+			compileResult.addResult(r);
+			if (compileResult.isError())
+			{
+				return compileResult;
+			}
+			MathExprStatement* mathExpr = (MathExprStatement*)conditionalExpr;
+			if (mathExpr->mathExpression->type != v->type)
+			{
+				compileResult.setError("Type mismatch " + v->name + " is of type " + v->type + " and value assigned is of type " + mathExpr->mathExpression->type);
+				return compileResult;
+			}
+			v->value = mathExpr->mathExpression->getMathExpressionValue();
+			v->valueExpression = mathExpr->mathExpression;
+		}
+	}
+	else
+	{
+		if (conditionalExpr!= nullptr)
+		{
+			Result r = conditionalExpr->compile(compile_context);
+			compileResult.addResult(r);
+			if (compileResult.isError())
+			{
+				return compileResult;
+			}
+		}
+	}
+	return compileResult;
+}
+
+void ForInitExpression::printQuadruple() const
+{
+	if (type != "")
+	{
+		cout << "Declare " << identifier << " " << type << endl;
+	}
+	else if (type == "" && identifier != "")
+	{
+		cout << "Assign " << identifier << endl;
+	}
+	else
+	{
+		this->conditionalExpr->printQuadruple();
+	}
+}
+
+Result ForFinalExpression::compile(compileContext& compile_context) const
+{
+	Result compileResult = Result("", "", false);
+	if (identifier != "")
+	{
+		//variable was already declared before
+		symbol* s = compile_context.getTopTable()->getSymbol(identifier);
+		if (s == nullptr)
+		{
+			compileResult.setError("Variable " + identifier + " not declared");
+			return compileResult;
+		}
+		variable* v = static_cast<variable*>(s);
+		if(conditionalExpr != nullptr)
+		{
+			Result r = conditionalExpr->compile(compile_context);
+			compileResult.addResult(r);
+			if (compileResult.isError())
+			{
+				return compileResult;
+			}
+			MathExprStatement* mathExpr = (MathExprStatement*)conditionalExpr;
+			if (mathExpr->mathExpression->type != v->type)
+			{
+				compileResult.setError("Type mismatch " + v->name + " is of type " + v->type + " and value assigned is of type " + mathExpr->mathExpression->type);
+				return compileResult;
+			}
+			v->value = mathExpr->mathExpression->getMathExpressionValue();
+			v->valueExpression = mathExpr->mathExpression;
+		}
+	}
+	else if (conditionalExpr != nullptr)
+	{
+		Result r = conditionalExpr->compile(compile_context);
+		compileResult.addResult(r);
+		if (compileResult.isError())
+		{
+			return compileResult;
+		}
+	}
+	return compileResult;
+} 
+
+void ForFinalExpression::printQuadruple() const
+{
+	if (identifier != "")
+	{
+		cout << "Assign " << identifier << endl;
+	}
+	else if (conditionalExpr != nullptr)
+	{
+		this->conditionalExpr->printQuadruple();
+	}
+}
+
+Result DeclareForStatement::compile(compileContext& compile_context)const
+{
+	Result compileResult = Result("", "", false);
+	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
+	compile_context.addTable(table);
+	compile_context.pushTable(table);
+	Result r = forInitExpression->compile(compile_context);
+	compileResult.addResult(r);
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	r = conditionalExpr->compile(compile_context);
+	compileResult.addResult(r);
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	for (auto forDo : forLoopDo->forFinalExpressions)
+	{
+		r = forDo->compile(compile_context);
+		compileResult.addResult(r);
+		if (compileResult.isError())
+		{
+			return compileResult;
+		}
+	}
+	r = block->compile(compile_context);
+	compileResult.addResult(r);
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	printQuadruple();
+	return compileResult;
+}
+
+void DeclareForStatement::printQuadruple() const
+{
+	cout << "DeclareFor " << endl;
+	forInitExpression->printQuadruple();
+	conditionalExpr->printQuadruple();
+	for (auto forDo : forLoopDo->forFinalExpressions)
+	{
+		forDo->printQuadruple();
+	}
+	block->printQuadruple();
 }
