@@ -1,6 +1,8 @@
-int a;
-do 
+int x;
+switch(x)
 {
-  int s;
-}while(a+10);
-
+case '1':
+{int as4;}
+case 5:
+{int as5;}
+}

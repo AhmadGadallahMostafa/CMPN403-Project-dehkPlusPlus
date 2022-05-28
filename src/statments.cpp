@@ -340,3 +340,65 @@ void DeclareDoWhileStatement::printQuadruple() const
 	cout << "While" << endl;
 	this->conditionalExpr->printQuadruple();
 }
+
+Result SwitchCase::compile(compileContext& compile_context) const
+{
+	Result compileResult = Result("", "", false);
+	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
+	compile_context.addTable(table);
+	compile_context.pushTable(table);
+	Result r = this->block->compile(compile_context);
+	compileResult.addResult(r);
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	return compileResult;
+}
+
+void SwitchCase::printQuadruple() const
+{
+	cout << "Case " << this->switchCaseValue->value << endl;
+	cout << "Goto" << endl;
+	this->block->printQuadruple();
+}
+
+Result DeclareSwitchStatement::compile(compileContext& compile_context) const 
+{
+	Result compileResult = Result("","",false);
+	symbol *s = compile_context.getTopTable()->getSymbol(this->identifier);
+	if (s == nullptr)
+	{
+		compileResult.setError("Variable " + this->identifier + " not declared");
+		return compileResult;
+	}
+	variable* v = static_cast<variable*>(s);
+	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
+	compile_context.addTable(table);
+	compile_context.pushTable(table);
+	for (auto switchCase : this->switchCaseList->switchCases)
+	{
+		if (switchCase->switchCaseValue->type != v->type)
+		{
+			compileResult.setError("Type mismatch " + v->name + " is of type " + v->type + " can't be used to switch " + switchCase->switchCaseValue->type);
+			return compileResult;
+		}
+		Result r = switchCase->compile(compile_context);
+		compileResult.addResult(r);
+	}
+	if (compileResult.isError())
+	{
+		return compileResult;
+	}
+	printQuadruple();
+	return compileResult;
+}
+
+void DeclareSwitchStatement::printQuadruple() const
+{
+	cout << "Switch " << this->identifier << endl;
+	for (auto switchCase : this->switchCaseList->switchCases)
+	{
+		switchCase->printQuadruple();
+	}
+}

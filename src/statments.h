@@ -224,3 +224,46 @@ class DeclareDoWhileStatement : public ConditionalExprStatement
 	virtual Result compile(compileContext& compile_context) const override;
 	void printQuadruple() const override;
 };
+
+class SwitchCase : public Statement
+{
+	public:
+	LiteralVal* switchCaseValue;
+	BlockStatement* block;
+	inline SwitchCase(LiteralVal* switchCaseValue, BlockStatement* block)
+	{
+		this->switchCaseValue = switchCaseValue;
+		if (switchCaseValue == nullptr)
+		{
+			switchCaseValue = new LiteralVal("default", "default");
+		}
+		this->block = block;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};
+
+class SwitchCaseList
+{
+	public:
+	vector<SwitchCase*> switchCases;
+	inline void appendSwitchCase(SwitchCase* switchCase)
+	{
+		switchCases.push_back(switchCase);
+	}
+};
+
+class DeclareSwitchStatement : Statement
+{
+	public:
+	string identifier;
+	SwitchCaseList* switchCaseList;
+	inline DeclareSwitchStatement(string identifier, SwitchCaseList* switchCaseList)
+	{
+		this->identifier = identifier;
+		this->switchCaseList = switchCaseList;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+
+};

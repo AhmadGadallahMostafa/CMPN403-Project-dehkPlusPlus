@@ -56,7 +56,10 @@ ProgramNode* programptr = nullptr;
 %type <declare_assignStatement_val> variable_assignment
 %type <declare_whileStatement_val> while_statement
 %type <declare_doWhileStatement_val> do_statement
-
+%type <switch_case_val> switch_case
+%type <switch_case_list_val> switch_case_list
+%type <literal_val> switch_case_value
+%type <declare_switchStatement_val> switch_statement
 
 %union{
     char *stringValue;
@@ -79,6 +82,9 @@ ProgramNode* programptr = nullptr;
     DeclareAssignStatement* declare_assignStatement_val;
     DeclareWhileStatement* declare_whileStatement_val;
     DeclareDoWhileStatement* declare_doWhileStatement_val;
+    SwitchCase* switch_case_val;
+    SwitchCaseList* switch_case_list_val;
+    DeclareSwitchStatement* declare_switchStatement_val;
 }
 
  /*Defining the grammar */
@@ -250,13 +256,21 @@ condtional_expr:
 ;
 
 /*Switch statement*/
-switch_statement: SWITCH LEFT_PAREN IDENTIFIER RIGHT_PAREN LEFT_BRACE switch_case_list RIGHT_BRACE;
-switch_case_list: switch_case_list switch_case
-| switch_case;
-switch_case: CASE switch_case_value COLON LEFT_BRACE program RIGHT_BRACE
-| DEFAULT COLON LEFT_BRACE program RIGHT_BRACE;
+switch_statement: SWITCH LEFT_PAREN IDENTIFIER RIGHT_PAREN LEFT_BRACE switch_case_list RIGHT_BRACE{$$ = new DeclareSwitchStatement($3,$6);};
 
-switch_case_value: INT_VALUE | CHAR_VALUE | BOOL_VALUE_TRUE | BOOL_VALUE_FALSE;
+switch_case_list: 
+  switch_case_list switch_case       {$$->appendSwitchCase($2);}
+| switch_case                        {$$ = new SwitchCaseList();$$->appendSwitchCase($1);}
+
+switch_case: 
+  CASE switch_case_value COLON block  {$$ = new SwitchCase($2,$4);}
+| DEFAULT COLON block                 {$$ = new SwitchCase(nullptr,$3);}
+
+switch_case_value: 
+  INT_VALUE           {$$ = new LiteralVal("int", $1);}
+| CHAR_VALUE          {$$ = new LiteralVal("char", $1);}
+| BOOL_VALUE_TRUE     {$$ = new LiteralVal("bool", $1);}
+| BOOL_VALUE_FALSE    {$$ = new LiteralVal("bool", $1);}
 
 /*Break statement*/
 break_statement: BREAK SEMICOLON;
