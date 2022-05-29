@@ -104,7 +104,6 @@ ProgramNode* programptr = nullptr;
 }
 
  /*Defining the grammar */
-
 %%
 program : 
 
@@ -197,8 +196,8 @@ parameter_list:
     $$->appendParameter($3);
   }
 | parameter                       {$$ = new ParameterList();$$->appendParameter($1);}
-  
-| ;
+|                               
+;
 
 parameter: 
   variable_type IDENTIFIER                              {$$ = new parameter($1,$2,nullptr);}
@@ -305,7 +304,6 @@ continue_statement: CONTINUE SEMICOLON;
 /*Return statement*/
 return_statement: RETURN SEMICOLON
 | RETURN condtional_expr SEMICOLON
-{$$ = new MathExprStatement(nullptr,$2);};
 ;
 
 /*For statement*/

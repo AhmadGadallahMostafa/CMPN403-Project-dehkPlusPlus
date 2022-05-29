@@ -1,0 +1,30 @@
+Quadruples:
+DeclareFor 
+Declare i int
+Math expression i<10
+Assign i
+Declare variable b int
+Assign value 10 To variable b 
+Declare variable x int
+Assign value 0 To variable x 
+Declare while 
+Math expression x<20
+Declare assign x
+Math expression x+1
+Declare assign x
+Math expression 0
+Do
+Declare assign x
+Math expression x+1
+While
+Math expression x<20
+Declare variable x int
+Switch x
+Case 1
+Goto
+Declare variable case1 int
+Case 2
+Goto
+Declare variable case2 int
+--------------------------------------------------
+Symbol table:

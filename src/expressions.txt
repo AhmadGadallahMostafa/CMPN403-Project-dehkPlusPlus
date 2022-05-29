@@ -1,4 +1,4 @@
-def void main()
+def void main(char arg)
 {
   int x = 0;
   int y = 10;

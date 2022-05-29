@@ -1,4 +1,4 @@
-def int f1(int a)
+def int f1()
 {
     int x = 0;
 }

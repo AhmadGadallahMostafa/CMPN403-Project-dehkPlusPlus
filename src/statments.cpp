@@ -106,47 +106,56 @@ Result DeclareFunctionStatement::compile(compileContext& compile_context) const
 	//compile_context.addTable(table);
 	compile_context.pushTable(table);
 	//add functionSymbol parameters to its scopes
-	for (auto param : this->parameters->parameters)
+	if (this->parameters == nullptr)
 	{
-		variable* symbol = new variable();
-		symbol->name = param->name;
-		symbol->type = param->type;
-		symbol->isConst = false;
-		symbol->symbolType = param->symbolType;
-		if (param->conditionalExpr != nullptr)
+		r = this->blockNode->compile(compile_context);
+		compileResult.addResult(r);
+		return compileResult;
+	}
+	else
+	{
+		for (auto param : this->parameters->parameters)
 		{
-			symbol->isInitialized = true;
-			Result compileConditionalExprResult = param->conditionalExpr->compile(compile_context);
-			compileResult.addResult(compileConditionalExprResult);
+			variable* symbol = new variable();
+			symbol->name = param->name;
+			symbol->type = param->type;
+			symbol->isConst = false;
+			symbol->symbolType = param->symbolType;
+			if (param->conditionalExpr != nullptr)
+			{
+				symbol->isInitialized = true;
+				Result compileConditionalExprResult = param->conditionalExpr->compile(compile_context);
+				compileResult.addResult(compileConditionalExprResult);
+				if (compileResult.isError())
+				{
+					return compileResult;
+				}
+				MathExprStatement* mathExpr = (MathExprStatement*)param->conditionalExpr;
+				if (mathExpr->mathExpression->type != symbol->type)
+				{
+					compileResult.setError("Type of variable "+param->name +" is not equal to type of the expression");
+					return compileResult;
+				}
+				symbol->value = mathExpr->mathExpression->getMathExpressionValue();
+				symbol->valueExpression = mathExpr->mathExpression;
+			}
+			else
+			{
+				symbol->isInitialized = false;
+			}
+			Result result = compile_context.getTopTable()->addSymbol(symbol);
+			compileResult.addResult(result);
+			//if compile result is error, return it
 			if (compileResult.isError())
 			{
 				return compileResult;
 			}
-			MathExprStatement* mathExpr = (MathExprStatement*)param->conditionalExpr;
-			if (mathExpr->mathExpression->type != symbol->type)
-			{
-				compileResult.setError("Type of variable "+param->name +" is not equal to type of the expression");
-				return compileResult;
-			}
-			symbol->value = mathExpr->mathExpression->getMathExpressionValue();
-			symbol->valueExpression = mathExpr->mathExpression;
 		}
-		else
-		{
-			symbol->isInitialized = false;
-		}
-		Result result = compile_context.getTopTable()->addSymbol(symbol);
-		compileResult.addResult(result);
-		//if compile result is error, return it
-		if (compileResult.isError())
-		{
-			return compileResult;
-		}
+		symbol->addParameters(this->parameters->parameters);
+		r = this->blockNode->compile(compile_context);
+		compileResult.addResult(r);
+		return compileResult;
 	}
-	symbol->addParameters(this->parameters->parameters);
-	r = this->blockNode->compile(compile_context);
-	compileResult.addResult(r);
-	return compileResult;
 }
 void DeclareFunctionStatement::printQuadruple() const
 {
