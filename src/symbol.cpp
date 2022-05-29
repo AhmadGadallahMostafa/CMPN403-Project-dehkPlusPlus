@@ -57,23 +57,123 @@ void SymbolTable::print()
         if (it->second->symbolType == "variable")
         {
             variable* v = (variable*)it->second;
-            cout << "variable " << it->first << " " << v->type << " " << v->isConst << " " << v->value << endl;
+            std::cout << "variable " << it->first << " " << v->type << " " << v->isConst << " " << v->value << endl;
         }
         else if (it->second->symbolType == "functionSymbol")
         {
             functionSymbol* f = (functionSymbol*)it->second;
-            cout << "functionSymbol " << it->first << " " << f->returnType << endl;
+            std::cout << "functionSymbol " << it->first << " " << f->returnType << endl;
         }
         else if (it->second->symbolType == "parameter")
         {
             variable* p = static_cast<variable*>(it->second);
-            cout << "parameter " << it->first << " " << p->type <<" "<<p->value<< endl;
+            std::cout << "parameter " << it->first << " " << p->type <<" "<<p->value<< endl;
         }
         //cout << it->first << " " << it->second->symbolType << " " << it->second->line << " " << it->second->column << endl;
     }
 }
 
-void SymbolTable::removeSymbol(string name)
+void SymbolTable::printToFile(ofstream& file)
 {
-    table.erase(name);
+    for (auto it = table.begin(); it != table.end(); it++)
+    {
+        if (it->second->symbolType == "variable")
+        {
+            variable* v = (variable*)it->second;
+            std::cout << "variable " << it->first << " " << v->type << " " << v->isConst << " " << v->value << endl;
+        }
+        else if (it->second->symbolType == "functionSymbol")
+        {
+            functionSymbol* f = (functionSymbol*)it->second;
+            std::cout << "functionSymbol " << it->first << " " << f->returnType << endl;
+        }
+        else if (it->second->symbolType == "parameter")
+        {
+            variable* p = static_cast<variable*>(it->second);
+            std::cout << "parameter " << it->first << " " << p->type <<" "<<p->value<< endl;
+        }
+        //cout << it->first << " " << it->second->symbolType << " " << it->second->line << " " << it->second->column << endl;
+    }
 }
+
+void SymbolTable::addChild(SymbolTable* child)
+{
+    children.push_back(child);
+}
+
+vector<string> MathExpression::printQuadruple()
+{
+    stack<string> temps;
+    string finalResult;
+    vector<string> quadruple;
+    int quadrupleCounter = 0;
+    stack<symbol*> symbols;
+    stack<operatorSymbol*> opsStack;
+    for(auto s: this->operands)
+    {
+        symbols.push(s);
+    }
+    for(auto s: this->ops)
+    {
+        opsStack.push(s);
+    }
+    while (opsStack.size()>0)
+    {
+        operatorSymbol* op = opsStack.top();
+        opsStack.pop();
+        if (op->op != "!")
+        {
+            if (temps.size()>0)
+            {
+                string prevTemp = temps.top();
+                temps.pop();
+                symbol* s = symbols.top();
+                symbols.pop();
+                quadrupleCounter++;
+                string temp = "t" + to_string(quadrupleCounter);
+                if (s->symbolType == "literalVal")
+                {
+                    LiteralVal* val = (LiteralVal*)s;
+                    quadruple.push_back(op->getOpQuadruple(op->op,prevTemp, val->value)+" "+temp+" "+prevTemp+" "+val->value);
+                }
+                else
+                quadruple.push_back(op->getOpQuadruple(op->op, prevTemp, s->name)+" "+temp+" "+prevTemp+" "+s->name);
+                finalResult = temp;
+            }
+            else
+            {
+            symbol* operand2 = symbols.top();
+            symbols.pop();
+            string op2String;
+            if (operand2->symbolType=="literalVal")
+            {
+                LiteralVal* val = (LiteralVal*)operand2;
+                op2String = val->value;
+            }
+            else
+            {
+                op2String = operand2->name;
+            }
+            symbol* operand1 = symbols.top();
+            symbols.pop();
+            string op1String;
+            if (operand1->symbolType=="literalVal")
+            {
+                LiteralVal* val = (LiteralVal*)operand1;
+                op1String = val->value;
+            }
+            else
+            {
+                op1String = operand1->name;
+            }
+            quadrupleCounter++;
+            string temp = "t" + to_string(quadrupleCounter);
+            temps.push(temp);
+            quadruple.push_back(op->getOpQuadruple(op->op, op1String, op2String)+" "+temp+" "+op1String+" "+op2String);
+            finalResult = temp;
+            }
+        }
+    }
+    return quadruple;
+}
+

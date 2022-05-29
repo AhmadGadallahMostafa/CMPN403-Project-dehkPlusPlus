@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <stack>
 #include "Result.h"
 using namespace std;
 struct MathExpression;
@@ -30,6 +31,7 @@ struct variable : public symbol
     {
         cout << "variable " << name << " " << type << " " << isConst << " " << value << endl;
     }
+    vector<string> printQuadruple();
 };
 
 struct LiteralVal : public symbol
@@ -40,6 +42,7 @@ struct LiteralVal : public symbol
     {
         this->type = type;
         this->value = value;
+        this->symbolType = "literalVal";
     }
     virtual void print() override
     {
@@ -69,10 +72,15 @@ struct functionSymbol : symbol
 {
     string returnType;
     vector<parameter*> parameters;
+    void addParameters(vector<parameter*>& parameter)
+    {
+       this->parameters = parameter;
+    }
     virtual void print() override
     {
         cout << "functionSymbol " << name << " " << returnType << endl;
     }
+    string printQuadruple();
 };
 
 struct operatorSymbol
@@ -81,6 +89,61 @@ struct operatorSymbol
     operatorSymbol(string op)
     {
         this->op = op;
+    }
+    static string getOpQuadruple(string operatorS, string op1, string op2)
+    {
+        if (operatorS == "+")
+        {
+            return "ADD";
+        }
+        else if (operatorS == "-")
+        {
+            return "SUB";
+        }
+        else if (operatorS == "*")
+        {
+            return "MUL";
+        }
+        else if (operatorS == "/")
+        {
+            return "DIV";
+        }
+        else if (operatorS == "==")
+        {
+            return "EQ";
+        }
+        else if (operatorS == "!=")
+        {
+            return "NE";
+        }
+        else if (operatorS == "<")
+        {
+            return "LT";
+        }
+        else if (operatorS == ">")
+        {
+            return "GT";
+        }
+        else if (operatorS == "<=")
+        {
+            return "LE";
+        }
+        else if (operatorS == ">=")
+        {
+            return "GE";
+        }
+        else if (operatorS == "&&")
+        {
+            return "AND";
+        }
+        else if (operatorS == "||")
+        {
+            return "OR";
+        }
+        else if (operatorS == "!")
+        {
+            return "NOT";
+        }
     }
 };
 
@@ -125,40 +188,7 @@ struct MathExpression
         }
         return result;
     }
-    std::string getMathExpressionQuadruple()
-    {
-        std::string result = "";
-        for(int i = 0; i < operands.size(); i++)
-        {
-            if(i < ops.size())
-            {
-                if (ops[i]->op == "+") result += " ADD ";
-                else if (ops[i]->op == "-") result += " SUB ";
-                else if (ops[i]->op == "*") result += " MUL ";
-                else if (ops[i]->op == "/") result += " DIV ";
-                else if (ops[i]->op == "%") result += " MOD ";
-                else if (ops[i]->op == "==") result += " EQ ";
-                else if (ops[i]->op == "!=") result += " NE ";
-                else if (ops[i]->op == "<") result += " LT ";
-                else if (ops[i]->op == ">") result += " GT ";
-                else if (ops[i]->op == "<=") result += " LE ";
-                else if (ops[i]->op == ">=") result += " GE ";
-                else if (ops[i]->op == "&&") result += " AND ";
-                else if (ops[i]->op == "||") result += " OR ";
-            }
-            if (operands[i]->name =="")
-            {
-                LiteralVal* val = static_cast<LiteralVal*>(operands[i]);
-                result += val->value;
-            }
-            else
-            {
-                result += operands[i]->name;
-
-            }
-        }
-        return result;
-    }
+    vector<string> printQuadruple();
     Result appendOperator(operatorSymbol* op)
     {
         ops.push_back(op);
@@ -182,11 +212,14 @@ class SymbolTable
 private:
     unordered_map<string, symbol*> table; // string is the identifier and symbot contains the information
     SymbolTable* parent;
+    vector<SymbolTable*> children;
 public:
     SymbolTable(SymbolTable* parent);
     Result addSymbol(symbol* s);
     symbol* getSymbol(string name);
+    void addChild(SymbolTable* child);
     void removeSymbol(string name);
     void print();
+    void printToFile(ofstream& file);
 };
 

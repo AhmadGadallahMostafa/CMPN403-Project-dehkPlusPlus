@@ -45,19 +45,14 @@ Result DeclareVariableStatement::compile(compileContext& compile_context) const
 	compileVarResult.addResult(declareVarResult);
 	return compileVarResult;
 }
+
 void DeclareVariableStatement::printQuadruple() const
 {
-	cout << "DeclareVariableStatement" << endl;
-	cout << "name: " << this->name << endl;
-	cout << "type: " << this->type << endl;
+	cout << "Declare variable " << this->name << " " << this->type << endl;
 	if (this->assignment != nullptr)
 	{
-		cout << "assignment: " << endl;
-		this->assignment->printQuadruple();
-	}
-	else
-	{
-		cout << "assignment: null" << endl;
+		MathExprStatement* mathExpr = (MathExprStatement*)this->assignment;
+		cout << "Assign value " <<mathExpr->mathExpression->getMathExpressionValue()<<" To variable "<< this->name<<" "<<endl;
 	}
 }
 
@@ -74,11 +69,6 @@ Result ProgramNode::compile(compileContext& compile_context) const
 	for (auto Statement : statments)
 	{
 		Result result = Statement->compile(compile_context);
-		//when compiling statments if there is an error, stop compiling
-		if (result.isError())
-		{
-			return result;
-		}
 		compileResult.addResult(result);
 	}
 	if (!is_main)
@@ -110,8 +100,10 @@ Result DeclareFunctionStatement::compile(compileContext& compile_context) const
 	{
 		return compileResult;
 	}
-	SymbolTable *table = new SymbolTable(compile_context.getTopTable());
-	compile_context.addTable(table);
+	SymbolTable* parentTable = compile_context.getTopTable();
+	SymbolTable *table = new SymbolTable(parentTable);
+	parentTable->addChild(table);
+	//compile_context.addTable(table);
 	compile_context.pushTable(table);
 	//add functionSymbol parameters to its scopes
 	for (auto param : this->parameters->parameters)
@@ -151,19 +143,18 @@ Result DeclareFunctionStatement::compile(compileContext& compile_context) const
 			return compileResult;
 		}
 	}
+	symbol->addParameters(this->parameters->parameters);
 	r = this->blockNode->compile(compile_context);
 	compileResult.addResult(r);
 	return compileResult;
 }
 void DeclareFunctionStatement::printQuadruple() const
 {
-	cout << "Function: " << this->name << endl;
-	cout << "Parameters: ";
+	cout << "Declare function " << this->name << " " << this->returnType << endl;
 	for (auto param : this->parameters->parameters)
 	{
-		cout << param->name << " ";
+		cout << "Parameter " << param->name << " " << param->type << endl;
 	}
-	cout << endl;
 	this->blockNode->printQuadruple();
 }
 
@@ -215,25 +206,25 @@ Result MathExprStatement::appendExpression(MathExprStatement* mathExpression, op
 
 void MathExprStatement::printQuadruple() const
 {
-	return;
+	cout << "Math expression " << this->mathExpression->getMathExpressionValue() << endl;
 }
 
 Result DeclareIfStatement::compile(compileContext& compile_context) const
 {
 	Result compileResult = Result("", "", false);
 	Result r = this->conditionalExpr->compile(compile_context);
-	compile_context.getTopTable()->removeSymbol(r.getResult());
+	//compile_context.getTopTable()->removeSymbol(r.getResult());
 	compileResult.addResult(r);
 	if (compileResult.isError())
 	{
 		return compileResult;
 	}
-	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
-	compile_context.addTable(table);
+	SymbolTable* parentTable = compile_context.getTopTable();
+	SymbolTable *table = new SymbolTable(parentTable);
+	parentTable->addChild(table);
 	compile_context.pushTable(table);
 	r = this->ifBlock->compile(compile_context);
 	compileResult.addResult(r);
-	printQuadruple();
 	if (this->elIf != nullptr)
 	{
 		r = this->elIf->compile(compile_context);
@@ -241,9 +232,10 @@ Result DeclareIfStatement::compile(compileContext& compile_context) const
 	}
 	if (this->elseBlock != nullptr)
 	{
-		SymbolTable* table = new SymbolTable(compile_context.getTopTable());
-		compile_context.addTable(table);
-		compile_context.pushTable(table);
+	SymbolTable* parentTable = compile_context.getTopTable();
+	SymbolTable *table = new SymbolTable(parentTable);
+	parentTable->addChild(table);
+	compile_context.pushTable(table);
 		r = this->elseBlock->compile(compile_context);
 		compileResult.addResult(r);
 	}
@@ -251,10 +243,14 @@ Result DeclareIfStatement::compile(compileContext& compile_context) const
 }
 void DeclareIfStatement::printQuadruple() const
 {
-	cout << "If" << endl;
+	cout << "Declare if " << endl;
 	this->conditionalExpr->printQuadruple();
-	cout << "Goto" << endl;
 	this->ifBlock->printQuadruple();
+	if (this->elIf != nullptr)
+	{
+		cout << "ElseIf" << endl;
+		this->elIf->printQuadruple();
+	}
 	if (this->elseBlock != nullptr)
 	{
 		cout << "Else" << endl;
@@ -291,15 +287,16 @@ Result DeclareAssignStatement::compile(compileContext& compile_context) const
 
 void DeclareAssignStatement::printQuadruple() const
 {
-	cout << "Assign: " << this->identifier << endl;
+	cout << "Declare assign " << this->identifier << endl;
 	this->conditionalExpr->printQuadruple();
 }
 
 Result DeclareWhileStatement::compile(compileContext& compile_context)const
 {
 	Result compileResult = Result("", "", false);
-	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
-	compile_context.addTable(table);
+	SymbolTable* parentTable = compile_context.getTopTable();
+	SymbolTable *table = new SymbolTable(parentTable);
+	parentTable->addChild(table);
 	compile_context.pushTable(table);
 	Result r = this->conditionalExpr->compile(compile_context);
 	compileResult.addResult(r);
@@ -309,23 +306,22 @@ Result DeclareWhileStatement::compile(compileContext& compile_context)const
 	}
 	r = this->block->compile(compile_context);
 	compileResult.addResult(r);
-	printQuadruple();
 	return compileResult;
 }
 
 void DeclareWhileStatement::printQuadruple() const
 {
-	cout << "While" << endl;
+	cout << "Declare while " << endl;
 	this->conditionalExpr->printQuadruple();
-	cout << "Goto" << endl;
 	this->block->printQuadruple();
 }
 
 Result DeclareDoWhileStatement::compile(compileContext& compile_context) const
 {
 	Result compileResult = Result("", "", false);
-	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
-	compile_context.addTable(table);
+	SymbolTable* parentTable = compile_context.getTopTable();
+	SymbolTable *table = new SymbolTable(parentTable);
+	parentTable->addChild(table);
 	compile_context.pushTable(table);
 	Result r = this->block->compile(compile_context);
 	compileResult.addResult(r);
@@ -335,7 +331,6 @@ Result DeclareDoWhileStatement::compile(compileContext& compile_context) const
 	}
 	r = this->conditionalExpr->compile(compile_context);
 	compileResult.addResult(r);
-	printQuadruple();
 	return compileResult;
 }
 
@@ -350,8 +345,9 @@ void DeclareDoWhileStatement::printQuadruple() const
 Result SwitchCase::compile(compileContext& compile_context) const
 {
 	Result compileResult = Result("", "", false);
-	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
-	compile_context.addTable(table);
+	SymbolTable* parentTable = compile_context.getTopTable();
+	SymbolTable *table = new SymbolTable(parentTable);
+	parentTable->addChild(table);
 	compile_context.pushTable(table);
 	Result r = this->block->compile(compile_context);
 	compileResult.addResult(r);
@@ -379,8 +375,9 @@ Result DeclareSwitchStatement::compile(compileContext& compile_context) const
 		return compileResult;
 	}
 	variable* v = static_cast<variable*>(s);
-	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
-	compile_context.addTable(table);
+	SymbolTable* parentTable = compile_context.getTopTable();
+	SymbolTable *table = new SymbolTable(parentTable);
+	parentTable->addChild(table);
 	compile_context.pushTable(table);
 	for (auto switchCase : this->switchCaseList->switchCases)
 	{
@@ -396,7 +393,6 @@ Result DeclareSwitchStatement::compile(compileContext& compile_context) const
 	{
 		return compileResult;
 	}
-	printQuadruple();
 	return compileResult;
 }
 
@@ -561,8 +557,9 @@ void ForFinalExpression::printQuadruple() const
 Result DeclareForStatement::compile(compileContext& compile_context)const
 {
 	Result compileResult = Result("", "", false);
-	SymbolTable* table = new SymbolTable(compile_context.getTopTable());
-	compile_context.addTable(table);
+	SymbolTable* parentTable = compile_context.getTopTable();
+	SymbolTable *table = new SymbolTable(parentTable);
+	parentTable->addChild(table);
 	compile_context.pushTable(table);
 	Result r = forInitExpression->compile(compile_context);
 	compileResult.addResult(r);
@@ -591,7 +588,6 @@ Result DeclareForStatement::compile(compileContext& compile_context)const
 	{
 		return compileResult;
 	}
-	printQuadruple();
 	return compileResult;
 }
 
@@ -599,10 +595,74 @@ void DeclareForStatement::printQuadruple() const
 {
 	cout << "DeclareFor " << endl;
 	forInitExpression->printQuadruple();
-	conditionalExpr->printQuadruple();
+	conditionalExpr->printQuadruple( );
 	for (auto forDo : forLoopDo->forFinalExpressions)
 	{
 		forDo->printQuadruple();
 	}
 	block->printQuadruple();
+}
+
+Result FunctionCall::compile(compileContext& compile_context)const
+{
+	Result compileResult = Result("", "", false);
+	symbol* s = compile_context.getTopTable()->getSymbol(identifier);
+	if (s == nullptr)
+	{
+		compileResult.setError("Function " + identifier + " not declared");
+		return compileResult;
+	}
+	functionSymbol* f = static_cast<functionSymbol*>(s);
+	int i = 0;
+	for (auto arg : this->argumentList->arguments)
+	{
+		Result r = arg->compile(compile_context);
+		MathExprStatement* mathExpr = (MathExprStatement*)arg;
+		if(f->parameters[i]->type != mathExpr->mathExpression->type)
+		{
+			compileResult.setError("Type mismatch " + f->parameters[i]->name + " is of type " + f->parameters[i]->type + " and value assigned is of type " + mathExpr->mathExpression->type);
+			return compileResult;
+		}
+		compileResult.addResult(r);
+		if (compileResult.isError())
+		{
+			return compileResult;
+		}
+		i++;
+	}
+	return compileResult;
+}
+
+void FunctionCall::printQuadruple() const
+{
+	cout << "Call " << identifier << endl;
+}
+
+Result ReturnStatment::compile(compileContext& compile_context)const
+{
+	Result compileResult = Result("", "", false);
+	if (conditionalExpr != nullptr)
+	{
+		Result r = conditionalExpr->compile(compile_context);
+		compileResult.addResult(r);
+		if (compileResult.isError())
+		{
+			return compileResult;
+		}
+		MathExprStatement* mathExpr = (MathExprStatement*)conditionalExpr;
+	}
+	return compileResult;
+}
+
+void ReturnStatment::printQuadruple() const
+{
+	if (conditionalExpr != nullptr)
+	{
+		cout << "Return " << endl;
+		conditionalExpr->printQuadruple();
+	}
+	else
+	{
+		cout << "Return " << endl;
+	}
 }

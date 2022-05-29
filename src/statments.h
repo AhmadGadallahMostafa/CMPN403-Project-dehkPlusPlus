@@ -16,6 +16,8 @@ struct compileContext
     SymbolTable symbolTable;
 	stack<SymbolTable*> tablesStack = stack<SymbolTable*>();
 	vector<SymbolTable*> tables;
+	vector<string> tempQuadruple;
+	vector<string> quadruple;
 	SymbolTable* getTopTable() 
 	{
 		if (tablesStack.empty())
@@ -44,6 +46,14 @@ struct compileContext
 	void addTable(SymbolTable* table) 
 	{
 		tables.push_back(table);
+	}
+	void addQuadruple(vector<string>& quadruple) 
+	{
+		this->quadruple.insert(this->quadruple.end(), quadruple.begin(), quadruple.end());
+	}
+	void addTempQuadruple(vector<string>& quadruple) 
+	{
+		this->tempQuadruple.insert(this->tempQuadruple.end(), quadruple.begin(), quadruple.end());
 	}
 };
 
@@ -320,6 +330,42 @@ class DeclareForStatement : Statement
 		this->forInitExpression = forInitExpression;
 		this->forLoopDo = forLoopDo;
 		this->block = block;
+		this->conditionalExpr = conditionalExpr;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};
+
+class ArgumentList
+{
+	public:
+	vector<ConditionalExprStatement*> arguments;
+	inline void appendArgument(ConditionalExprStatement* argument)
+	{
+		arguments.push_back(argument);
+	}
+};
+
+class FunctionCall : public ConditionalExprStatement
+{
+	public:
+	string identifier;
+	ArgumentList* argumentList;
+	inline FunctionCall(string identifier, ArgumentList* argumentList)
+	{
+		this->identifier = identifier;
+		this->argumentList = argumentList;
+	}
+	virtual Result compile(compileContext& compile_context) const override;
+	void printQuadruple() const override;
+};
+
+class ReturnStatment : public ConditionalExprStatement
+{
+	public:
+	ConditionalExprStatement* conditionalExpr;
+	inline ReturnStatment(ConditionalExprStatement* conditionalExpr)
+	{
 		this->conditionalExpr = conditionalExpr;
 	}
 	virtual Result compile(compileContext& compile_context) const override;

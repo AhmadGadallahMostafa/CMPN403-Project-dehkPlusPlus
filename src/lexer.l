@@ -6,8 +6,10 @@
     #include "y.tab.h"
     #include "symbol.h"
 #include "statments.h"
+int yyerror(char *s);
+extern "C" int yylex(void);
 %}
-
+%option yylineno
 /*Here we will define our tokens and rules for each token  
    Rules are matched with priority such that it will return the lexeme of the first match
  */

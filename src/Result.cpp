@@ -12,8 +12,8 @@ bool Result::isError()
 
 void Result::addResult(Result& r)
 {
-    result += r.result;
-    error += r.error;
+    result += r.result + "\n";
+    error += r.error + "\n";
     is_error = r.is_error;
 }
 

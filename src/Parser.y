@@ -11,8 +11,8 @@
 #include "symbol.h"
 #include "statments.h"
 void yyerror(char *s);
-int yylex(void);
-
+extern "C" int yylex(void);
+extern int yylineno;
 
 ProgramNode* programptr = nullptr;
 %}
@@ -64,6 +64,11 @@ ProgramNode* programptr = nullptr;
 %type <for_final_expr_val> final_expr
 %type <for_loop_do_val>for_loop_do
 %type <declare_forStatement_val> for_statement
+%type <conditional_expr_statement_val> argument
+%type <argument_list_val> argument_list
+%type <argument_list_val> args_list
+%type <function_call_val> function_call
+%type <math_expr_statement_val> return_statement
 
 %union{
     char *stringValue;
@@ -93,6 +98,9 @@ ProgramNode* programptr = nullptr;
     ForFinalExpression* for_final_expr_val;
     ForLoopDo* for_loop_do_val;
     DeclareForStatement* declare_forStatement_val;
+    ArgumentList* argument_list_val;
+    ArgumentList* argument_val;
+    FunctionCall* function_call_val;
 }
 
  /*Defining the grammar */
@@ -113,11 +121,7 @@ program statement
     programptr -> is_main = true;
   }
 }
-/* |
-statement
-{
-  printf("stmt\n");
-} */
+
 ;
 
 block:
@@ -202,17 +206,29 @@ parameter:
 ;
 
 /*Function call*/
-function_call: IDENTIFIER LEFT_PAREN args_list RIGHT_PAREN SEMICOLON;
+function_call: IDENTIFIER LEFT_PAREN args_list RIGHT_PAREN SEMICOLON
+{
+    $$ = new FunctionCall($1,$3);
+};
 
 function_call_in_expr: IDENTIFIER LEFT_PAREN args_list RIGHT_PAREN;
 
-args_list: argument_list
+args_list: argument_list {$$ = $1;}
 | ;
 
-argument_list: argument_list COMMA argument
-| argument;
+argument_list: 
+  argument_list COMMA argument
+  {
+    $$->appendArgument($3);
+  }
+| argument {$$ = new ArgumentList();$$->appendArgument($1);}
+;
 
-argument: condtional_expr
+argument: 
+ condtional_expr
+ {
+   $$ = $1;
+ }
 |DEFAULT IDENTIFIER ASSIGN condtional_expr;
 
 /*If statment*/
@@ -288,7 +304,9 @@ continue_statement: CONTINUE SEMICOLON;
 
 /*Return statement*/
 return_statement: RETURN SEMICOLON
-| RETURN condtional_expr SEMICOLON;
+| RETURN condtional_expr SEMICOLON
+{$$ = new MathExprStatement(nullptr,$2);};
+;
 
 /*For statement*/
 for_statement: FOR LEFT_PAREN for_init_expr SEMICOLON condtional_expr SEMICOLON for_loop_do RIGHT_PAREN block
@@ -398,7 +416,6 @@ $1->appendExpression($3, op);$$ = $1;
 | math_expr TIMES math_expr
 {
   operatorSymbol* op = new operatorSymbol($2);
-  printf("%s\n", $2);
   $1->appendExpression($3, op);$$ = $1;
 }
 | math_expr DIVIDE math_expr
@@ -435,32 +452,5 @@ void yyerror (char* s)
     printf("%s\n", s);
 }
 
-/* int yyerror (char* s)
-{
-return yyerror(string(s));
-} */
-/* int main (void)
-{
 
-    yyin = fopen("test.txt", "r");
-    if (yyin == NULL)
-    {
-        printf("File not found\n");
-        return 1;
-    }
-    else
-    {
-        printf(">>> Test.txt ...\n\n");
-        FILE *testFile;
-        char ch;
-        testFile= fopen("test.txt", "r");
-        while ((ch = fgetc(testFile)) != EOF)
-        {
-            printf("%c", ch);
-        }
-        yyparse();
-    }
-    fclose(yyin);
-    return 0;
-} */
 
